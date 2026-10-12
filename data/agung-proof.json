@@ -1,18 +1,35 @@
 {
-  "_source": "skim/docs/proof/agung.md (agung testnet run 2026-10-12, 30/30 txs status 1) + agent/logs/mainnet-fork-proof.txt + docs/proof/forge-test.txt",
+  "_source": "skim/docs/proof/agung.md (agung testnet run 2026-10-12, 30/30 txs status 1) + agent/logs/mainnet-fork-proof.txt",
   "explorer": "https://agung-testnet.subscan.io",
   "date": "12 Oct 2026",
   "txCount": 30,
   "txs": [
-    { "label": "Machine ID activated", "hash": "0x753718fee2bc5275e46138f094a34036e30897f501ffb433f905cb60e99c4ea8" },
-    { "label": "NFT escrowed · advance", "hash": "0x3e8bc2539edd50c3ed55b5d967a77e913df07f8cfc7c555454af67f8f82309aa" },
-    { "label": "First routed payment", "hash": "0xec6c4a448a81f0b07070b944ddd9abcb96ad06a32d2f674e71ea225f00f42261" },
-    { "label": "Repaid · NFT returned", "hash": "0xb8fa6774b9388ae69a672739bc91c182fa68686da6dae011c5b3fc8a8b672995" }
+    {
+      "label": "Machine ID activated",
+      "hash": "0x753718fee2bc5275e46138f094a34036e30897f501ffb433f905cb60e99c4ea8"
+    },
+    {
+      "label": "NFT escrowed · advance",
+      "hash": "0x3e8bc2539edd50c3ed55b5d967a77e913df07f8cfc7c555454af67f8f82309aa"
+    },
+    {
+      "label": "First routed payment",
+      "hash": "0xec6c4a448a81f0b07070b944ddd9abcb96ad06a32d2f674e71ea225f00f42261"
+    },
+    {
+      "label": "Repaid · NFT returned",
+      "hash": "0xb8fa6774b9388ae69a672739bc91c182fa68686da6dae011c5b3fc8a8b672995"
+    }
   ],
   "accounts": [
-    { "label": "SkimVault", "address": "0xA97b3C4F7cf5468dB2507C5769ad973e02F33D20" },
-    { "label": "RevenueRouter", "address": "0xeD420FD5Ea0df60d2f873F13e34B4F5edbB99237" }
+    {
+      "label": "SkimVault",
+      "address": "0xA97b3C4F7cf5468dB2507C5769ad973e02F33D20"
+    },
+    {
+      "label": "RevenueRouter",
+      "address": "0xeD420FD5Ea0df60d2f873F13e34B4F5edbB99237"
+    }
   ],
-  "fork": "Also on a peaq mainnet fork (nothing broadcast): a real mainnet Machine NFT escrowed → returned · controller unchanged · trust-1 EventRegistry 2.0 event posted while escrowed",
-  "tests": "forge 41/41"
+  "fork": "Also on a peaq mainnet fork (nothing broadcast): a real mainnet Machine NFT escrowed → returned · controller unchanged · trust-1 EventRegistry 2.0 event posted while escrowed"
 }

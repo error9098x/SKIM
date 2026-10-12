@@ -7,6 +7,7 @@ import { isDemo, isPlaceholderLink, loanTerms, unitLabel } from './view';
 import { FlowStrip } from './Flow';
 import { LoopSteps } from './Hero';
 import PROOF from '@/data/agung-proof.json';
+import FORGE from '@/data/forge-tests.json';
 
 const DATA_STEPS = [
   ['Keeper → EventRegistry', 'Every routed payment becomes a peaq revenue event (trust 1) citing the router tx.'],
@@ -86,7 +87,7 @@ export function HowItWorks({ state }: { state: SkimState }) {
             ))}
           </ul>
           <p className="mt-2.5 text-[12px] leading-relaxed text-ink-2">
-            {PROOF.fork} · {PROOF.tests}. On agung the rating is simulated and revenue events go to a mock registry.
+            {PROOF.fork} · forge {FORGE.passed}/{FORGE.total} tests pass. On agung the rating is simulated and revenue events go to a mock registry.
           </p>
         </div>
       </div>

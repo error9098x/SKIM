@@ -35,6 +35,24 @@ if (fs.existsSync(src)) {
   }
 }
 
+// Proof row test count: read from the captured forge run, never hardcoded (QA-6).
+// Falls back to the committed data/forge-tests.json when docs/ is absent (e.g. web-only checkout).
+{
+  const forgeTxt = path.resolve(web, process.env.FORGE_PROOF || '../docs/proof/forge-test.txt');
+  const out = path.join(web, 'data', 'forge-tests.json');
+  if (fs.existsSync(forgeTxt)) {
+    const t = fs.readFileSync(forgeTxt, 'utf8');
+    const m = [...t.matchAll(/(\d+) tests passed, (\d+) failed, (\d+) skipped \((\d+) total tests\)/g)].pop();
+    if (m) {
+      const rec = { passed: Number(m[1]), failed: Number(m[2]), total: Number(m[4]), source: 'skim/docs/proof/forge-test.txt' };
+      const prev = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : '';
+      const next = JSON.stringify(rec, null, 2) + '\n';
+      if (prev !== next) fs.writeFileSync(out, next);
+      console.log(`[sync] forge ${rec.passed}/${rec.total} (from ${path.relative(web, forgeTxt)})`);
+    } else console.warn('[sync] forge-test.txt has no summary line; keeping data/forge-tests.json');
+  }
+}
+
 const preferred = process.env.NEXT_PUBLIC_NETWORK || null;
 fs.writeFileSync(
   path.join(dst, 'index.json'),

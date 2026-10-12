@@ -42,8 +42,11 @@ export function LoanPanel({ state }: { state: SkimState }) {
           </div>
         </div>
         <div className="shrink-0 text-right">
-          <div className="label">Due</div>
-          <div suppressHydrationWarning className="num mt-1 text-sm text-ink">{fmtDate(loan?.dueAt)}</div>
+          {/* QA-4: a closed loan has no due date; same two-line slot, so no height change */}
+          <div className="label">{repaid ? 'Closed' : 'Due'}</div>
+          <div suppressHydrationWarning className="num mt-1 text-sm text-ink">
+            {repaid ? (state.closed?.timestamp ? fmtDate(state.closed.timestamp) : 'Repaid in full') : fmtDate(loan?.dueAt)}
+          </div>
         </div>
       </div>
 
