@@ -122,9 +122,18 @@ export function GradeBadge({ grade, size = 'md', sim = false }: { grade: string;
 export function ModeBar({ state, liveAvailable, liveError }: { state: SkimState; liveAvailable: boolean; liveError?: string }) {
   const demo = isDemo(state);
   let text: string;
+  let short: string | undefined;
   if (demo) {
     const lead = liveAvailable ? (liveError ? 'Chain unreachable, retrying · showing demo replay' : 'Connecting to chain · showing demo replay') : 'Simulated · demo replay of one loan cycle';
     text = state.demoPhase ? `${lead} · ${state.demoPhase}` : lead;
+    // 390px: one short line so the phase is never ellipsised ("Simulated · demo · Repaying · session 4").
+    const ph = state.demoPhase
+      ?.replace('Repaying from revenue', 'Repaying')
+      .replace(' · waiting for first session', '')
+      .replace(' · starter line available', '')
+      .replace('rating upgraded to', 'upgraded to');
+    const sl = liveAvailable ? (liveError ? 'Chain unreachable · demo' : 'Connecting · demo') : 'Simulated · demo';
+    short = ph ? `${sl} · ${ph}` : sl;
   } else {
     const parts = [state.network.name];
     if (state.blockNumber !== undefined) parts.push(`block ${state.blockNumber.toString()}`);
@@ -136,7 +145,14 @@ export function ModeBar({ state, liveAvailable, liveError }: { state: SkimState;
     <div role="status" aria-live="off" className={`h-9 border-b border-rule ${demo ? 'sim-hatch-paper' : 'bg-paper-2'}`}>
       <div className="mx-auto flex h-full max-w-6xl items-center gap-2 px-4 text-[12px] text-ink-2 sm:px-6">
         <span aria-hidden className={`h-1.5 w-1.5 shrink-0 rounded-full ${demo ? 'bg-ink-3' : liveError ? 'bg-danger' : 'bg-repaid'}`} />
-        <span className="min-w-0 truncate">{text}</span>
+        {short ? (
+          <>
+            <span className="min-w-0 truncate sm:hidden">{short}</span>
+            <span className="hidden min-w-0 truncate sm:inline">{text}</span>
+          </>
+        ) : (
+          <span className="min-w-0 truncate">{text}</span>
+        )}
       </div>
     </div>
   );

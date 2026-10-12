@@ -45,7 +45,8 @@ export function MachineCard({ state }: { state: SkimState }) {
         <div className="min-w-0">
           <div className="label">Machine Credit Rating</div>
           <div className="mt-1 flex h-7 min-w-0 items-baseline gap-x-2 overflow-hidden whitespace-nowrap">
-            <span className="truncate text-xl font-semibold text-ink">{grade}</span>
+            {/* mobile: the seal beside already names the grade, so only the score shows (no "Provision…" ellipsis) */}
+            <span className="hidden truncate text-xl font-semibold text-ink sm:inline">{grade}</span>
             <span className="num shrink-0 text-sm text-ink-2">score {score ?? '—'}</span>
           </div>
           <div className="mt-1.5 flex h-6 min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap text-[12px] text-ink-2">

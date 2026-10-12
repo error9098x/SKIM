@@ -35,7 +35,9 @@ export function LoanPanel({ state }: { state: SkimState }) {
         <div className="min-w-0">
           <div className="label">Credit line</div>
           <div className="mt-1 flex items-center gap-2">
-            <span className="truncate text-lg font-semibold text-ink">Revenue-based advance</span>
+            <span className="truncate text-base font-semibold text-ink sm:text-lg">
+              Revenue<span className="hidden sm:inline">-based</span> advance
+            </span>
             <Chip tone={tone}>{status}</Chip>
           </div>
         </div>
@@ -66,9 +68,6 @@ export function LoanPanel({ state }: { state: SkimState }) {
         </div>
         <div className="relative mt-3 h-3 overflow-hidden rounded-full bg-paper-2">
           <div className={`h-full rounded-full transition-[width,background-color] duration-300 ease-out ${repaid ? 'bg-repaid' : 'bg-skim'}`} style={{ width: `${progress * 100}%` }} />
-          {[25, 50, 75].map((m) => (
-            <span key={m} className="absolute top-0 h-full w-px bg-paper" style={{ left: `${m}%` }} />
-          ))}
         </div>
         <div className="mt-3 grid grid-cols-3 gap-3 text-[12px]">
           <div className="min-w-0">
@@ -159,7 +158,7 @@ export function TermsCurve({ state }: { state: SkimState }) {
           {/* marker: steps up one row on upgrade */}
           <div
             aria-hidden
-            className="step-marker absolute inset-x-0 top-0 rounded-md border border-skim/70 bg-skim/10"
+            className="step-marker absolute inset-x-0 top-0 rounded-md border border-peaq/60 bg-peaq/10"
             style={{ height: ROW_H, transform: `translateY(${idx * ROW_H}px)` }}
           />
           {rows.map((t) => {
@@ -170,11 +169,11 @@ export function TermsCurve({ state }: { state: SkimState }) {
               <div key={t.grade} className="relative grid grid-cols-[92px_minmax(0,1fr)_72px] items-center gap-2 px-2 sm:grid-cols-[104px_minmax(0,1fr)_96px] sm:gap-3" style={{ height: ROW_H }}>
                 <span className={`truncate font-mono text-[13px] font-semibold ${on ? 'text-ink' : 'text-ink-2'}`}>{gradeName(t.grade)}</span>
                 <div className="flex min-w-0 items-center gap-2">
-                  <span className={`block h-3.5 shrink-0 rounded-sm transition-colors duration-300 ${on ? 'bg-skim' : 'bg-ink-3/40'}`} style={{ width: `calc(${w}% - ${w * 0.5}px)` }} />
+                  <span className={`block h-3.5 shrink-0 rounded-sm transition-colors duration-300 ${on ? 'bg-peaq' : 'bg-ink-3/40'}`} style={{ width: `calc(${w}% - ${w * 0.5}px)` }} />
                   <span className={`num shrink-0 text-[12px] ${on ? 'text-ink' : 'text-ink-2'}`}>{fmtToken(t.principal, 2)}</span>
                 </div>
                 {/* fixed slot: fee · skim only on current and next */}
-                <span className={`num truncate text-right text-[12px] ${on ? 'text-skim-text' : 'text-ink-2'}`}>
+                <span className={`num truncate text-right text-[12px] ${on ? 'text-peaq-text' : 'text-ink-2'}`}>
                   {on || isNext ? `${pct(t.feeBps)} · ${pct(t.skimBps)}` : ''}
                 </span>
               </div>
@@ -191,7 +190,7 @@ export function TermsCurve({ state }: { state: SkimState }) {
         </details>
       </div>
       <div className="mt-3 h-5 truncate text-[12px] leading-5 text-ink-3">
-        <span className="text-skim-text">You are here: {gradeName(current)}</span> · labels show fee · skim for the current and next grade
+        <span className="text-peaq-text">You are here: {gradeName(current)}</span> · labels show fee · skim for the current and next grade
       </div>
     </div>
   );
