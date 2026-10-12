@@ -76,6 +76,13 @@ export function MachineCard({ state }: { state: SkimState }) {
             )}
           </dd>
         </div>
+        {/* Controller is a design fact of the escrow (cited, not read live): no tick, no live styling. */}
+        <div className="flex h-6 items-center justify-between gap-3">
+          <dt className="text-ink-2">NFT controller</dt>
+          <dd className="min-w-0 truncate text-[12px] text-ink-2" title="SkimVault escrows ownership only; the operator keeps operating the machine">
+            Operator · unchanged by escrow
+          </dd>
+        </div>
         <div className="flex h-6 items-center justify-between gap-3">
           <dt className="text-ink-2">Machine wallet</dt>
           <dd className="min-w-0">
