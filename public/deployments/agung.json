@@ -2183,5 +2183,35 @@
         "inputs": []
       }
     ]
-  }
+  },
+  "customer": "0x0c9Aa6ea0e037F33225A3d1110790867F841E39d",
+  "loans": [
+    {
+      "n": 1,
+      "grade": "Provisioned",
+      "principal": "0.1",
+      "feeBps": 1000,
+      "skimBps": 3000,
+      "sessions": 8,
+      "sessionValue": "0.05",
+      "customer": "0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e",
+      "openTx": "0x3e8bc2539edd50c3ed55b5d967a77e913df07f8cfc7c555454af67f8f82309aa",
+      "closeTx": "0xb8fa6774b9388ae69a672739bc91c182fa68686da6dae011c5b3fc8a8b672995",
+      "ratingAfter": "B 46"
+    },
+    {
+      "n": 2,
+      "grade": "B",
+      "principal": "0.2",
+      "feeBps": 900,
+      "skimBps": 2800,
+      "sessions": 8,
+      "sessionValue": "0.1",
+      "customer": "0x0c9Aa6ea0e037F33225A3d1110790867F841E39d",
+      "openTx": "0x35ccdad22846286067b810c7ff8cdc30029f1c5a569142256032fd1c7bea9692",
+      "closeTx": "0xf5f259c15a7ff6950c27475fc25cf66bc47a4a5793978b544eeec5cd77b1be46",
+      "ratingAfter": "BBB 62"
+    }
+  ],
+  "ratingSimulated": true
 }
