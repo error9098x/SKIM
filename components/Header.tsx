@@ -19,7 +19,7 @@ export function Logo() {
   );
 }
 
-/** Demoted: a quiet secondary control. The primary CTA is "Watch a loan repay itself" in the hero. */
+/** Demoted, honestly labelled (owner-managed liquidity, no LP shares): a quiet secondary control. The primary CTA is "Watch a loan repay itself" in the hero. */
 export function FundVault({ state }: { state: SkimState }) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('1');
@@ -50,13 +50,13 @@ export function FundVault({ state }: { state: SkimState }) {
         aria-expanded={open}
         className="whitespace-nowrap rounded-lg border border-rule px-3 py-1.5 text-[13px] font-medium text-ink-2 transition-colors duration-200 hover:border-ink-3 hover:text-ink"
       >
-        Fund the vault
+        Vault liquidity
       </button>
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 w-[min(320px,calc(100vw-2rem))] rounded-xl border border-rule bg-paper p-4 shadow-lg">
-          <div className="text-sm font-medium text-ink">Lend to machines</div>
+          <div className="text-sm font-medium text-ink">Vault liquidity · owner-managed</div>
           <p className="mt-1 text-[12px] leading-relaxed text-ink-2">
-            Deposits go to <span className="font-mono">SkimVault.deposit()</span> and fund advances. Uses your injected wallet; viewing never needs one.
+            <span className="font-mono">SkimVault.deposit()</span> adds liquidity that funds advances. There are no LP shares yet: only the vault owner can withdraw, so this is the operator&apos;s own capital, not an outside-lender product. Uses your injected wallet; viewing never needs one.
           </p>
           {!live ? (
             <p className="mt-3 rounded-lg border border-rule bg-paper-2 p-2.5 text-[12px] text-ink-2">This page is showing the demo replay. Deposits unlock once a deployment is synced.</p>

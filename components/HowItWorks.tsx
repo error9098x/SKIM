@@ -65,6 +65,9 @@ export function HowItWorks({ state }: { state: SkimState }) {
           <p>
             <span className="font-medium text-ink">Credit compounds.</span> Verified revenue raises the MCR, and a better grade unlocks a bigger, cheaper next line.
           </p>
+          <p className="sm:col-span-3">
+            <span className="font-medium text-ink">Why not bypass the router?</span> Only revenue routed through <span className="font-mono text-[13px]">RevenueRouter</span> becomes a trust-1 revenue event, which feeds the MCR and the next, bigger line; and the Machine NFT stays in escrow until the advance is repaid.
+          </p>
         </div>
       </div>
       <div className="flex flex-col gap-5">
