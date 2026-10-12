@@ -140,6 +140,12 @@ export function ModeBar({ state, liveAvailable, liveError }: { state: SkimState;
     if (state.simulatedRating) parts.push('rating simulated (no MCR on this network)');
     if (liveError) parts.push('RPC hiccup, retrying every 5s');
     text = `Live · ${parts.join(' · ')}`;
+    // QA-7, 390px: keep 'rating simulated' visible (short network key, no parenthetical).
+    const sp = [state.network.key || state.network.name];
+    if (state.blockNumber !== undefined) sp.push(`block ${state.blockNumber.toString()}`);
+    if (state.simulatedRating) sp.push('rating simulated');
+    if (liveError) sp.push('RPC retrying');
+    short = `Live · ${sp.join(' · ')}`;
   }
   return (
     <div role="status" aria-live="off" className={`h-9 border-b border-rule ${demo ? 'sim-hatch-paper' : 'bg-paper-2'}`}>

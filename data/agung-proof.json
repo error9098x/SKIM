@@ -1,15 +1,15 @@
 {
-  "_source": "skim/docs/proof/agung.md (agung testnet run 2026-10-12, 30/30 txs status 1) + agent/logs/mainnet-fork-proof.txt",
+  "_source": "skim/docs/proof/agung.md: loan #1 (30 txs) + loan #2 (24 txs in its table, block-scanned raw/agung-loan2-txs.json), all status 1 + agent/logs/mainnet-fork-proof.txt",
   "explorer": "https://agung-testnet.subscan.io",
   "date": "12 Oct 2026",
-  "txCount": 30,
+  "txCount": 54,
   "txs": [
     {
       "label": "Machine ID activated",
       "hash": "0x753718fee2bc5275e46138f094a34036e30897f501ffb433f905cb60e99c4ea8"
     },
     {
-      "label": "NFT escrowed · advance",
+      "label": "Loan #1: NFT escrowed",
       "hash": "0x3e8bc2539edd50c3ed55b5d967a77e913df07f8cfc7c555454af67f8f82309aa"
     },
     {
@@ -17,8 +17,16 @@
       "hash": "0xec6c4a448a81f0b07070b944ddd9abcb96ad06a32d2f674e71ea225f00f42261"
     },
     {
-      "label": "Repaid · NFT returned",
+      "label": "Loan #1 repaid · NFT returned",
       "hash": "0xb8fa6774b9388ae69a672739bc91c182fa68686da6dae011c5b3fc8a8b672995"
+    },
+    {
+      "label": "Loan #2 at B: escrowed",
+      "hash": "0x35ccdad22846286067b810c7ff8cdc30029f1c5a569142256032fd1c7bea9692"
+    },
+    {
+      "label": "Loan #2 repaid · NFT returned",
+      "hash": "0xf5f259c15a7ff6950c27475fc25cf66bc47a4a5793978b544eeec5cd77b1be46"
     }
   ],
   "accounts": [
@@ -29,7 +37,12 @@
     {
       "label": "RevenueRouter",
       "address": "0xeD420FD5Ea0df60d2f873F13e34B4F5edbB99237"
+    },
+    {
+      "label": "Customer wallet (loan #2)",
+      "address": "0x0c9Aa6ea0e037F33225A3d1110790867F841E39d"
     }
   ],
-  "fork": "Also on a peaq mainnet fork (nothing broadcast): a real mainnet Machine NFT escrowed → returned · controller unchanged · trust-1 EventRegistry 2.0 event posted while escrowed"
+  "fork": "Also on a peaq mainnet fork (nothing broadcast): a real mainnet Machine NFT escrowed → returned · controller unchanged · trust-1 EventRegistry 2.0 event posted while escrowed",
+  "loans": 2
 }

@@ -65,7 +65,7 @@ export function HowItWorks({ state }: { state: SkimState }) {
             <span className="font-medium text-ink">Repayment is automatic.</span> No invoices or schedules: the router repays a fixed share of whatever the machine earns.
           </p>
           <p>
-            <span className="font-medium text-ink">Credit compounds.</span> Verified revenue raises the MCR, and a better grade unlocks a bigger, cheaper next line.
+            <span className="font-medium text-ink">Credit compounds.</span> Trust-1 revenue events raise the MCR, and a better grade unlocks a bigger, cheaper next line.
           </p>
           <p className="sm:col-span-3">
             <span className="font-medium text-ink">Why not bypass the router?</span> Only revenue routed through <span className="font-mono text-[13px]">RevenueRouter</span> becomes a trust-1 revenue event, which feeds the MCR and the next, bigger line; and the Machine NFT stays in escrow until the advance is repaid.
@@ -73,7 +73,7 @@ export function HowItWorks({ state }: { state: SkimState }) {
         </div>
         {/* JUDGE#2 proof row: static record of the real agung run (same in every mode), never a new section. */}
         <div id="proof" className="mt-5 border-t border-rule pt-5">
-          <div className="label">Proof · real transactions on peaq agung testnet · {PROOF.date} · {PROOF.txCount}/{PROOF.txCount} ok</div>
+          <div className="label">Proof · real transactions on peaq agung testnet · {PROOF.date} · {PROOF.loans} loans · {PROOF.txCount}/{PROOF.txCount} ok</div>
           <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px]">
             {PROOF.txs.map((t) => (
               <li key={t.hash}>

@@ -38,7 +38,8 @@ export function LoanPanel({ state }: { state: SkimState }) {
           <div className="label">Credit line</div>
           <div className="mt-1 flex items-center gap-2">
             <span className="truncate text-base font-semibold text-ink sm:text-lg">
-              Revenue<span className="hidden sm:inline">-based</span> advance
+              <span className="sm:hidden">Advance</span>
+              <span className="hidden sm:inline">Revenue-based advance</span>
             </span>
             <Chip tone={tone}>{status}</Chip>
           </div>
@@ -94,7 +95,7 @@ export function LoanPanel({ state }: { state: SkimState }) {
       <div className={`mt-5 flex h-10 items-center justify-between gap-3 rounded-lg border px-3 transition-colors duration-300 ${repaid ? 'border-repaid/50 bg-repaid/10' : 'border-rule bg-paper-2'}`}>
         <span className={`min-w-0 truncate text-[13px] ${repaid ? 'font-medium text-repaid-text' : 'text-ink-2'}`}>
           {repaid
-            ? `Repaid ✓ · NFT returned to operator · ${nSess} revenue session${nSess === 1 ? '' : 's'}`
+            ? <>Repaid ✓ · NFT returned<span className="hidden sm:inline"> to operator</span> · {nSess}<span className="hidden sm:inline"> revenue</span> session{nSess === 1 ? '' : 's'}</>
             : loan?.status === 3
               ? 'Defaulted · vault keeps the Machine NFT'
               : loan
@@ -190,7 +191,7 @@ export function TermsCurve({ state }: { state: SkimState }) {
         <details className="group md:hidden">
           <summary className="flex h-10 cursor-pointer list-none items-center justify-between rounded-lg border border-rule bg-paper-2 px-3 text-[13px] text-ink-2">
             <span>Exact terms table · principal in {unit}, fee, skim</span>
-            <span aria-hidden className="text-ink-3 group-open:rotate-45">＋</span>
+            <span aria-hidden className="text-ink-3 group-open:rotate-45">+</span>
           </summary>
           <div className="mt-2">{table}</div>
         </details>

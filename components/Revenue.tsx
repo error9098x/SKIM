@@ -104,7 +104,7 @@ function SessionRow({ state, row, n, now, unit, fresh }: { state: SkimState; row
 }
 
 /** Plain on-chain action row (keeper post or loan event). No agent styling: what happened, where, which tx. */
-function ActionRow({ state, glyph, text, detail, tone, hash, ts, now, indent, title }: { state: SkimState; glyph: string; text: string; detail?: string; tone: string; hash?: string; ts?: number; now: number; indent?: boolean; title?: string }) {
+function ActionRow({ state, glyph, text, short, detail, tone, hash, ts, now, indent, title }: { state: SkimState; glyph: string; text: string; short?: string; detail?: string; tone: string; hash?: string; ts?: number; now: number; indent?: boolean; title?: string }) {
   return (
     <li title={title ?? (detail ? `${text} · ${detail}` : text)} className="flex h-10 items-center gap-4 bg-paper-2/60 px-4 sm:px-5">
       <span suppressHydrationWarning className="hidden w-16 shrink-0 text-[12px] text-ink-3 md:block">
@@ -114,7 +114,13 @@ function ActionRow({ state, glyph, text, detail, tone, hash, ts, now, indent, ti
         <span aria-hidden className={`w-4 shrink-0 text-center ${tone}`}>
           {glyph}
         </span>
-        <span className={`min-w-0 truncate ${tone}`}>
+        {/* QA-7, 390px: two 16px lines inside the same 40px row (no height change), so the detail
+            (where the honesty note lives: 'mock registry …', 'NFT escrowed') is never the part cut off. */}
+        <span className="flex min-w-0 flex-1 flex-col sm:hidden">
+          <span className={`truncate ${tone}`}>{short ?? text}</span>
+          {detail && <span className="truncate text-ink-3">{detail}</span>}
+        </span>
+        <span className={`hidden min-w-0 truncate sm:inline ${tone}`}>
           {text}
           {detail && <span className="text-ink-3"> · {detail}</span>}
         </span>
@@ -207,6 +213,7 @@ export function RevenueFeed({ state }: { state: SkimState }) {
                     state={state}
                     glyph={realRegistry ? '✓' : '↳'}
                     text={`Keeper posted peaq-format revenue event · ${fmtToken(r.s.amount, 3)} ${unit} · trust ${r.s.verified?.trustLevel ?? 1} · cites router tx`}
+                    short={`Keeper event · ${fmtToken(r.s.amount, 3)} ${unit} · trust ${r.s.verified?.trustLevel ?? 1} · cites router tx`}
                     detail={registryNote(state)}
                     title={usdNote(state, r.s.verified?.valueCents)}
                     tone={realRegistry ? 'text-repaid-text' : 'text-ink-2'}
