@@ -3,7 +3,8 @@ import type { SkimState } from '@/lib/types';
 import { gradeName } from '@/lib/config';
 import { fmtToken, pct, ratio, shortId, addrUrl } from '@/lib/format';
 import { GradeBadge } from './ui';
-import { hasLoan, isDemo, isRepaid, loanFeeBps, loanGrade, nextLine, nftInVault, realHref, unitLabel } from './view';
+import { FlowStrip } from './Flow';
+import { hasLoan, isDemo, isRepaid, loanFeeBps, loanGrade, nextLine, nftInVault, payoffSegments, realHref, unitLabel } from './view';
 
 export function loopStep(s: SkimState): number {
   if (isRepaid(s)) return 4;
@@ -50,16 +51,51 @@ export function LoopSteps({ state }: { state: SkimState }) {
   );
 }
 
+/** Payoff bar: one segment per session, each as wide as what that session repaid (capped). Σ segments = repaid. */
+function PayoffBar({ state, repaid }: { state: SkimState; repaid: boolean }) {
+  const loan = hasLoan(state) ? state.loan : null;
+  const segs = payoffSegments(state);
+  const owed = loan?.owed ?? 0n;
+  const progress = loan ? Math.min(1, ratio(loan.repaid, loan.owed)) : 0;
+  return (
+    <div>
+      <div className="flex h-5 items-center justify-between gap-3 text-[12px] leading-5">
+        <span className="truncate text-ink-2">
+          {loan ? `Repaid by ${segs.length} session${segs.length === 1 ? '' : 's'} · one segment each` : 'Payoff bar fills one segment per session'}
+        </span>
+        <span className={`num shrink-0 ${repaid ? 'text-repaid-text' : 'text-ink'}`}>{Math.round(progress * 100)}%</span>
+      </div>
+      <div
+        className="mt-1.5 flex h-3 overflow-hidden rounded-full bg-rule"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+        aria-label="Repaid of owed"
+      >
+        {segs.map((sg, i) => (
+          <span
+            key={sg.key}
+            className={`h-full shrink-0 transition-colors duration-300 ${i === segs.length - 1 && !repaid ? 'seg-in' : ''} ${repaid ? 'bg-repaid' : 'bg-skim'}`}
+            style={{ width: `${owed ? ratio(sg.vault, owed) * 100 : 0}%`, boxShadow: i < segs.length - 1 ? 'inset -2px 0 0 rgb(var(--paper))' : undefined }}
+            title={`Session ${i + 1}: ${fmtToken(sg.vault, 3)}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /**
  * The dark instrument. Reads EITHER the loan (open or closed) OR the offer, never a mix:
  * every field comes from state.loan + its origination terms, or from state.quote when no loan exists.
+ * Order: number → split flow → payoff bar, so each session's skim travels along the flow into the bar.
  * Payoff is a state of this card (fixed-height slots), never an inserted block.
  */
 function FacilityCard({ state }: { state: SkimState }) {
   const unit = unitLabel(state);
   const loan = hasLoan(state) ? state.loan : null;
   const repaid = isRepaid(state);
-  const progress = loan ? Math.min(1, ratio(loan.repaid, loan.owed)) : 0;
   const q = state.quote;
   const gradeNum = loan ? loanGrade(state) : q?.grade ?? state.rating?.grade;
   const g = gradeName(gradeNum);
@@ -69,6 +105,7 @@ function FacilityCard({ state }: { state: SkimState }) {
   const fee = loan ? loanFeeBps(state) : q?.feeBps;
   const skim = loan ? loan.skimBps : q?.skimBps;
   const next = nextLine(state);
+  const big = loan ? fmtToken(loan.repaid, 2) : fmtToken(principal, 2);
 
   let statusLine: { text: string; tone: string };
   if (repaid) statusLine = { text: 'Repaid ✓ · NFT returned to operator', tone: 'text-repaid-text' };
@@ -83,49 +120,53 @@ function FacilityCard({ state }: { state: SkimState }) {
   else nextText = `Rated ${g} · starter line available`;
 
   return (
-    <div id="loan-instrument" className="inst relative min-w-0 overflow-hidden rounded-[22px] border border-rule p-5 sm:p-6">
+    <div id="loan-instrument" className="inst relative min-w-0 overflow-hidden rounded-[22px] border border-rule p-4 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="label truncate">{loan ? `Advance · ${g} at origination` : `Offer · ${g}`}</div>
-          <div className="mt-1 truncate font-mono text-[13px] text-ink-2">did:peaq:{shortId(state.machineId)}</div>
+          <div className="mt-0.5 truncate font-mono text-[12px] text-ink-2">did:peaq:{shortId(state.machineId)}</div>
         </div>
-        <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[12px] font-medium transition-colors duration-300 ${statusTone}`}>{status}</span>
-      </div>
-
-      <div className="mt-6 flex items-end justify-between gap-4">
-        <div className="min-w-0">
-          <div className="label">{loan ? 'Repaid of owed' : 'Available advance'}</div>
-          <div className="num mt-1 whitespace-nowrap text-[32px] font-medium leading-none text-ink sm:text-[40px]">
-            {loan ? fmtToken(loan.repaid, 2) : fmtToken(principal, 2)}
-            <span className="ml-2 text-[13px] text-ink-2 sm:text-base">{loan ? `/ ${fmtToken(loan.owed, 2)} ${unit}` : unit}</span>
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-center gap-1">
-          <GradeBadge grade={g} sim={state.simulatedRating} />
-          <span className="text-[12px] text-ink-2">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="hidden text-[12px] text-ink-2 sm:inline">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
+          <GradeBadge grade={g} />
+          <span className={`rounded-md border px-2 py-0.5 text-[12px] font-medium transition-colors duration-300 ${statusTone}`}>{status}</span>
         </div>
       </div>
 
-      <div className="mt-5 h-2 overflow-hidden rounded-full bg-rule" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} aria-label="Repaid">
-        <div className={`h-full rounded-full transition-[width,background-color] duration-300 ease-out ${repaid ? 'bg-repaid' : 'bg-skim'}`} style={{ width: `${progress * 100}%` }} />
+      <div className="mt-4 min-w-0 sm:mt-5">
+        <div className="label">{loan ? 'Repaid of owed' : 'Available advance'}</div>
+        <div id="hero-number" className="num mt-1 flex h-[48px] items-baseline whitespace-nowrap leading-none sm:h-[66px]">
+          <span key={big} className="animate-rise text-[44px] font-medium tracking-[-0.02em] text-ink sm:text-[64px]">
+            {big}
+          </span>
+          <span className="ml-2 truncate text-[14px] text-ink-2 sm:text-lg">{loan ? `/ ${fmtToken(loan.owed, 2)} ${unit}` : unit}</span>
+        </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-rule pt-4">
+      <div className="mt-4 sm:mt-5">
+        <FlowStrip id="hero-flow" skimBps={skim} mode={repaid ? 'repaid' : loan ? 'active' : 'offer'} pulse={loan ? state.sessions.length : undefined} />
+      </div>
+
+      <div className="mt-4">
+        <PayoffBar state={state} repaid={repaid} />
+      </div>
+
+      <div className="mt-4 grid grid-cols-3 gap-3 border-t border-rule pt-3">
         <div className="min-w-0">
           <div className="label">Principal</div>
-          <div className="num mt-1 truncate text-sm text-ink">{fmtToken(principal, 2)}</div>
+          <div className="num mt-0.5 truncate text-sm text-ink">{fmtToken(principal, 2)}</div>
         </div>
         <div className="min-w-0">
           <div className="label">Fee</div>
-          <div className="num mt-1 text-sm text-ink">{pct(fee)}</div>
+          <div className="num mt-0.5 text-sm text-ink">{pct(fee)}</div>
         </div>
         <div className="min-w-0">
           <div className="label">Skim</div>
-          <div className="num mt-1 text-sm text-skim-text">{pct(skim)}</div>
+          <div className="num mt-0.5 text-sm text-skim-text">{pct(skim)}</div>
         </div>
       </div>
       {/* Two fixed one-line slots: state changes rewrite them, never add rows. */}
-      <div className="mt-4 h-5 truncate text-[12px] leading-5">
+      <div className="mt-3 h-5 truncate text-[12px] leading-5">
         <span className={`transition-colors duration-300 ${statusLine.tone}`}>{statusLine.text}</span>
       </div>
       <div className="h-5 truncate text-[12px] leading-5 text-ink-2">{nextText}</div>
@@ -136,22 +177,23 @@ function FacilityCard({ state }: { state: SkimState }) {
 export function Hero({ state, onReplay }: { state: SkimState; onReplay: () => void }) {
   const explorer = realHref(state, state.contracts.vault ? addrUrl(state.network.explorer, state.contracts.vault) : state.network.explorer);
   const demo = isDemo(state);
-  const cta = 'rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-paper transition-opacity duration-200 hover:opacity-90';
+  const cta = 'rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-paper transition-opacity duration-200 hover:opacity-90 sm:px-5 sm:py-3';
   return (
     <section className="relative">
-      <div className="mx-auto max-w-6xl px-4 pb-14 pt-12 sm:px-6 sm:pt-16 lg:pb-20">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
+      <div className="mx-auto max-w-6xl px-4 pb-10 pt-5 sm:px-6 sm:pt-10 lg:pb-14">
+        <div className="grid items-center gap-5 lg:grid-cols-[1fr_1.05fr] lg:gap-12">
           <div className="min-w-0">
-            <p className="text-[13px] text-ink-2">Revenue-based financing on peaq · Machine Economy</p>
-            <h1 className="mt-4 text-[40px] font-semibold leading-[1.04] tracking-[-0.03em] text-ink sm:text-6xl lg:text-[64px]">
+            <p className="hidden text-[13px] text-ink-2 sm:block">Revenue-based financing on peaq · Machine Economy</p>
+            <h1 className="text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] text-ink sm:mt-4 sm:text-6xl lg:text-[60px]">
               Machines earn.
               <br />
               <span className="text-ink-2">Now they can borrow.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-2 sm:text-lg">
+            <p className="mt-2 text-[14px] leading-snug text-ink-2 sm:hidden">An advance against the Machine NFT, repaid by skimming every payment it earns.</p>
+            <p className="mt-6 hidden max-w-xl text-lg leading-relaxed text-ink-2 sm:block">
               SKIM advances working capital to a machine against its Machine NFT, priced by its Machine Credit Rating, and repays itself by skimming a share of every on-chain payment the machine earns.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-3 flex flex-wrap gap-3 sm:mt-8">
               {demo ? (
                 <button
                   type="button"
@@ -169,16 +211,13 @@ export function Hero({ state, onReplay }: { state: SkimState; onReplay: () => vo
                 </a>
               )}
               {explorer && (
-                <a href={explorer} target="_blank" rel="noreferrer" className="rounded-xl border border-rule px-5 py-3 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink-3">
+                <a href={explorer} target="_blank" rel="noreferrer" className="rounded-xl border border-rule px-4 py-2.5 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink-3 sm:px-5 sm:py-3">
                   Open explorer ↗
                 </a>
               )}
             </div>
           </div>
           <FacilityCard state={state} />
-        </div>
-        <div className="mt-12">
-          <LoopSteps state={state} />
         </div>
       </div>
     </section>

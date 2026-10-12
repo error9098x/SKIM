@@ -99,6 +99,34 @@ body {
   background-image: repeating-linear-gradient(135deg, rgb(var(--hatch)) 0 4px, rgb(var(--paper)) 4px 8px);
 }
 
+
+/*
+ * Money motion (fires only when a value changes; elements are keyed by the value).
+ * 260ms per step, transform/opacity only, inside fixed boxes: zero layout shift.
+ * Sequence per session: Customer→Router (0ms), Router→Vault/Machine (260ms), bar segment (520ms).
+ */
+@keyframes flow-travel-x {
+  0% { transform: translateX(-100%); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateX(0); opacity: 0; }
+}
+@keyframes flow-travel-y {
+  0% { transform: translateY(-100%); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+@keyframes flow-flash { 0% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes seg-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.flow-travel-x { animation: flow-travel-x 260ms ease-in-out both; }
+.flow-travel-y { animation: flow-travel-y 260ms ease-in-out both; }
+.flow-flash { opacity: 0; animation: flow-flash 300ms ease-out 520ms both; }
+.seg-in { transform-origin: left center; animation: seg-in 260ms ease-out 520ms both; }
+
+/* Staircase marker steps on rating change. */
+.step-marker { transition: transform 320ms cubic-bezier(.2,.7,.2,1); }
+
 ::selection { background: rgb(var(--peaq) / 0.25); }
 
 /* Reduced motion: values jump, nothing travels. */
@@ -107,6 +135,7 @@ body {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
   }

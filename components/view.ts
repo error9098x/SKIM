@@ -74,3 +74,48 @@ export function nftInVault(s: SkimState): boolean {
   const v = s.contracts.vault?.toLowerCase();
   return !!s.nftOwner && !!v && s.nftOwner.toLowerCase() === v;
 }
+
+/**
+ * Per-session split as the contract settles it. RevenueRouter caps the skim at the amount still
+ * outstanding and forwards the excess to the machine wallet ("never over-skim the final payment").
+ * The bundled demo replay reports the uncapped final skim, so we re-apply the cap here (a no-op on
+ * live data, which already carries the capped value). Sessions before the current loan opened keep
+ * their raw split.
+ */
+export interface Split {
+  key: string;
+  vault: bigint; // applied to the loan
+  machine: bigint; // forwarded + any capped excess
+  excess: bigint; // skim beyond what was owed, routed to the machine instead
+  inLoan: boolean; // counts toward the current loan
+}
+export function sessionSplits(s: SkimState): Map<string, Split> {
+  const out = new Map<string, Split>();
+  const loan = hasLoan(s) ? s.loan : null;
+  let left = loan ? loan.owed : 0n;
+  // sessions arrive newest-first; settle oldest-first
+  for (let i = s.sessions.length - 1; i >= 0; i--) {
+    const x = s.sessions[i];
+    const inLoan = !!loan && (!x.timestamp || !loan.openedAt || x.timestamp >= loan.openedAt) && x.skimmed > 0n;
+    if (!inLoan) {
+      out.set(x.key, { key: x.key, vault: x.skimmed, machine: x.forwarded, excess: 0n, inLoan: false });
+      continue;
+    }
+    const vault = x.skimmed > left ? left : x.skimmed;
+    left -= vault;
+    const excess = x.skimmed - vault;
+    out.set(x.key, { key: x.key, vault, machine: x.forwarded + excess, excess, inLoan: true });
+  }
+  return out;
+}
+
+/** Oldest-first segments of the current loan's payoff bar: one per session that repaid something. */
+export function payoffSegments(s: SkimState): Split[] {
+  const m = sessionSplits(s);
+  const segs: Split[] = [];
+  for (let i = s.sessions.length - 1; i >= 0; i--) {
+    const sp = m.get(s.sessions[i].key);
+    if (sp && sp.inLoan && sp.vault > 0n) segs.push(sp);
+  }
+  return segs;
+}
