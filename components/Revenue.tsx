@@ -160,7 +160,7 @@ export function RevenueFeed({ state }: { state: SkimState }) {
   const nLoans = state.activity.filter((a) => a.kind === 'loan').length;
   const scope = nLoans > 1 ? ` · ${nLoans} loans` : '';
   const kpis: [string, string, string, string][] = [
-    ['Sessions', String(state.sessions.length), nLoans > 1 ? `${verified} posted${pending > 0 ? ` · ${pending} pending` : ''}${scope}` : sessionsSub, 'text-ink'],
+    ['Sessions', String(state.sessions.length), nLoans > 1 ? `${verified} ${realRegistry ? 'verified' : 'posted'}${pending > 0 ? ` · ${pending} pending` : ''}${scope}` : sessionsSub, 'text-ink'],
     ['Revenue routed', fmtToken(total, 3), `${unit}${scope}`, 'text-ink'],
     ['Repaid to vault', fmtToken(toVault, 3), scope ? `${unit}${scope}` : excess > 0n ? `${unit} · skim capped at owed` : `${unit} · skim share`, 'text-skim-text'],
     ['Forwarded to machine', fmtToken(toMachine, 3), `${unit}${scope}`, 'text-ink'],
