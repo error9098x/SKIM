@@ -51,7 +51,7 @@ export function Toasts({ state }: { state: SkimState }) {
   useEffect(() => () => timer.current && clearTimeout(timer.current), []);
 
   return (
-    <div aria-live="polite" aria-atomic="true" className="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex justify-center px-4">
+    <div aria-live="polite" aria-atomic="true" className="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex justify-center px-4 lg:justify-end lg:px-6">
       {toast && (
         <div key={toast.id} data-toast={toast.tone} className="animate-rise flex max-w-full items-center gap-2.5 rounded-xl bg-ink px-4 py-3 text-[14px] font-medium text-paper shadow-lg shadow-ink/20">
           <span aria-hidden className={`h-2 w-2 shrink-0 rounded-full ${toast.tone === 'repaid' ? 'bg-repaid' : 'bg-peaq'}`} />

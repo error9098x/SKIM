@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import type { SkimState } from '@/lib/types';
 import { gradeName } from '@/lib/config';
 import { fmtToken, pct, ratio, shortId, addrUrl } from '@/lib/format';
@@ -51,17 +52,41 @@ export function LoopSteps({ state }: { state: SkimState }) {
   );
 }
 
+/**
+ * Count of payoff segments the TEXT may describe. Increases land 520ms late, the same delay as
+ * `.seg-in`, so the label / % / big number move together with the segment (never one ahead).
+ * Decreases (replay reset) and reduced-motion snap immediately.
+ */
+const SEG_DELAY_MS = 520;
+function useShownSegs(n: number): number {
+  const [shown, setShown] = useState(n);
+  useEffect(() => {
+    if (n <= shown) {
+      if (n !== shown) setShown(n);
+      return;
+    }
+    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      setShown(n);
+      return;
+    }
+    const t = window.setTimeout(() => setShown(n), SEG_DELAY_MS);
+    return () => window.clearTimeout(t);
+  }, [n, shown]);
+  return Math.min(shown, n);
+}
+
 /** Payoff bar: one segment per session, each as wide as what that session repaid (capped). Σ segments = repaid. */
-function PayoffBar({ state, repaid }: { state: SkimState; repaid: boolean }) {
+function PayoffBar({ state, repaid, shownN, shownRepaid }: { state: SkimState; repaid: boolean; shownN: number; shownRepaid: bigint }) {
   const loan = hasLoan(state) ? state.loan : null;
   const segs = payoffSegments(state);
   const owed = loan?.owed ?? 0n;
-  const progress = loan ? Math.min(1, ratio(loan.repaid, loan.owed)) : 0;
+  const progress = loan ? Math.min(1, ratio(shownRepaid, loan.owed)) : 0;
   return (
     <div>
       <div className="flex h-5 items-center justify-between gap-3 text-[12px] leading-5">
         <span className="truncate text-ink-2">
-          {loan ? `Repaid by ${segs.length} session${segs.length === 1 ? '' : 's'} · one segment each` : 'Payoff bar fills one segment per session'}
+          {loan ? `Repaid by ${shownN} session${shownN === 1 ? '' : 's'} · one segment each` : 'Payoff bar fills one segment per session'}
         </span>
         <span className={`num shrink-0 ${repaid ? 'text-repaid-text' : 'text-ink'}`}>{Math.round(progress * 100)}%</span>
       </div>
@@ -105,7 +130,15 @@ function FacilityCard({ state }: { state: SkimState }) {
   const fee = loan ? loanFeeBps(state) : q?.feeBps;
   const skim = loan ? loan.skimBps : q?.skimBps;
   const next = nextLine(state);
-  const big = loan ? fmtToken(loan.repaid, 2) : fmtToken(principal, 2);
+  // Text lags the newest segment by its 520ms entrance (see useShownSegs).
+  const segs = payoffSegments(state);
+  const lagN = useShownSegs(segs.length);
+  // Once repaid the last segment renders without .seg-in, so the text snaps with it.
+  const shownN = repaid ? segs.length : lagN;
+  const segSum = segs.slice(0, shownN).reduce((a, x) => a + x.vault, 0n);
+  // Σ segments == loan.repaid (A1); fall back to loan.repaid once every segment is shown.
+  const shownRepaid = loan ? (shownN >= segs.length ? loan.repaid : segSum) : 0n;
+  const big = loan ? fmtToken(shownRepaid, 2) : fmtToken(principal, 2);
 
   let statusLine: { text: string; tone: string };
   if (repaid) statusLine = { text: 'Repaid ✓ · NFT returned to operator', tone: 'text-repaid-text' };
@@ -123,7 +156,14 @@ function FacilityCard({ state }: { state: SkimState }) {
     <div id="loan-instrument" className="inst relative min-w-0 overflow-hidden rounded-[22px] border border-rule p-4 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="label truncate">{loan ? `Advance · ${g} at origination` : `Offer · ${g}`}</div>
+          <div className="label truncate">{loan ? (
+              <>
+                Advance · {g}
+                <span className="hidden sm:inline"> at origination</span>
+              </>
+            ) : (
+              `Offer · ${g}`
+            )}</div>
           <div className="mt-0.5 truncate font-mono text-[12px] text-ink-2">did:peaq:{shortId(state.machineId)}</div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -148,7 +188,7 @@ function FacilityCard({ state }: { state: SkimState }) {
       </div>
 
       <div className="mt-4">
-        <PayoffBar state={state} repaid={repaid} />
+        <PayoffBar state={state} repaid={repaid} shownN={shownN} shownRepaid={shownRepaid} />
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-3 border-t border-rule pt-3">

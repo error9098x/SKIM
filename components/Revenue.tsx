@@ -131,8 +131,11 @@ export function RevenueFeed({ state }: { state: SkimState }) {
   const sessionNo = new Map(state.sessions.map((s, i) => [s.key, state.sessions.length - i]));
   const newest = state.sessions[0]?.key;
 
+  const pending = state.sessions.length - verified;
+  // "3 posted · 1 pending" while the keeper has not yet posted the newest event (never reads as a mismatch).
+  const sessionsSub = pending > 0 ? `${verified} ${demo ? 'posted' : 'verified'} · ${pending} pending` : demo ? `${verified} events posted` : `${verified} verified`;
   const kpis: [string, string, string, string][] = [
-    ['Sessions', String(state.sessions.length), demo ? `${verified} events posted` : `${verified} verified`, 'text-ink'],
+    ['Sessions', String(state.sessions.length), sessionsSub, 'text-ink'],
     ['Revenue routed', fmtToken(total, 3), unit, 'text-ink'],
     ['Repaid to vault', fmtToken(toVault, 3), excess > 0n ? `${unit} · skim capped at owed` : `${unit} · skim share`, 'text-skim-text'],
     ['Forwarded to machine', fmtToken(toMachine, 3), unit, 'text-ink'],
