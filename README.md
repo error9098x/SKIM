@@ -5,7 +5,7 @@
 > hands its **Machine NFT** (its on-chain identity token on peaq) to the lending contract. A share of every customer
 > payment is skimmed to repay the loan. When the loan is paid off, the NFT goes back to the machine's owner automatically.
 
-*peaq "Advance the Machine Economy" track.*
+*peaq "Advance the Machine Economy" track.* · **[Live app](https://skim-theta.vercel.app)** · **[Demo video (2:16)](https://drive.google.com/file/d/1bTtLVF0-TixY365fAAV-7SpBPHZrsy53/view)** · [GitHub](https://github.com/error9098x/SKIM)
 
 ![The SKIM web app reading peaq agung testnet live (green "Live · peaq agung testnet · block 11138478 · rating simulated" bar): loan #2 repaid 0.22 of 0.22 AGNG in 8 sessions, rating seal B → BBB, principal 0.20, fee 9%, skim 28%, "Repaid ✓ · NFT returned to operator", next line unlocked BBB 0.50 · 7% · 22%](docs/img/hero-live-agung.png)
 <sub>**Live, not a mock-up:** the app reading peaq **agung testnet** (block 11138478) after the machine's second loan: 0.2 AGNG

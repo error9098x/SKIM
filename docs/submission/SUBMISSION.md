@@ -46,10 +46,10 @@ Alternates:
 ## Tech stack
 Solidity 0.8.24 + Foundry (42 tests) · OpenZeppelin 5.1 · Node 22 / TypeScript / viem keeper and EV-charger simulator · peaqOS SDK · Next.js static web app.
 
-## Links (pending publish; filled only after the user approves publishing)
-- GitHub repo: *pending publish*
-- Live app: *pending publish* (reads the agung deployment; `?demo` shows the labelled replay)
-- Demo video (2:16, under 3:00): *pending publish* (unlisted YouTube or Loom)
+## Links
+- GitHub repo: https://github.com/error9098x/SKIM
+- Live app: https://skim-theta.vercel.app (reads the agung deployment; `?demo` shows the labelled replay)
+- Demo video (2:16, under 3:00): https://drive.google.com/file/d/1bTtLVF0-TixY365fAAV-7SpBPHZrsy53/view
 - agung machine activation: https://agung-testnet.subscan.io/tx/0x753718fee2bc5275e46138f094a34036e30897f501ffb433f905cb60e99c4ea8
 - agung loan #1 opened (NFT escrowed): https://agung-testnet.subscan.io/tx/0x3e8bc2539edd50c3ed55b5d967a77e913df07f8cfc7c555454af67f8f82309aa
 - agung SkimVault: https://agung-testnet.subscan.io/account/0xA97b3C4F7cf5468dB2507C5769ad973e02F33D20
@@ -57,7 +57,7 @@ Solidity 0.8.24 + Foundry (42 tests) · OpenZeppelin 5.1 · Node 22 / TypeScript
 - agung loan #2 opened at grade B (NFT escrowed): https://agung-testnet.subscan.io/tx/0x35ccdad22846286067b810c7ff8cdc30029f1c5a569142256032fd1c7bea9692
 - agung loan #2 closed / NFT returned (paid by separate customer wallet): https://agung-testnet.subscan.io/tx/0xf5f259c15a7ff6950c27475fc25cf66bc47a4a5793978b544eeec5cd77b1be46
 - agung customer wallet (loan #2): https://agung-testnet.subscan.io/account/0x0c9Aa6ea0e037F33225A3d1110790867F841E39d
-- Full proof (every tx, real vs simulated, spend): `docs/proof/agung.md` in the repo (*link pending publish*)
+- Full proof (every tx, real vs simulated, spend): `docs/proof/agung.md` in the repo (https://github.com/error9098x/SKIM/blob/main/docs/proof/agung.md)
 
 ## Form-field checklist before submitting (user)
 - [ ] Eligibility (Germany listing) confirmed
