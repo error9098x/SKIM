@@ -130,6 +130,9 @@ function FacilityCard({ state }: { state: SkimState }) {
   const fee = loan ? loanFeeBps(state) : q?.feeBps;
   const skim = loan ? loan.skimBps : q?.skimBps;
   const next = nextLine(state);
+  // After payoff the rating can move past the origination grade: show the transition, never a stale grade beside "Repaid".
+  const cur = state.rating?.grade;
+  const upgradedTo = loan && repaid && cur !== undefined && gradeNum !== undefined && cur > gradeNum ? gradeName(cur) : undefined;
   // Text lags the newest segment by its 520ms entrance (see useShownSegs).
   const segs = payoffSegments(state);
   const lagN = useShownSegs(segs.length);
@@ -154,22 +157,25 @@ function FacilityCard({ state }: { state: SkimState }) {
 
   return (
     <div id="loan-instrument" className="inst relative min-w-0 overflow-hidden rounded-[22px] border border-rule p-4 sm:p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="label truncate">{loan ? (
-              <>
-                Advance · {g}
-                <span className="hidden sm:inline"> at origination</span>
-              </>
-            ) : (
-              `Offer · ${g}`
-            )}</div>
-          <div className="mt-0.5 truncate font-mono text-[12px] text-ink-2">did:peaq:{shortId(state.machineId)}</div>
+      {/* Row 1: what this card is + loan status. Row 2: machine DID + its rating (source labelled at every width). */}
+      <div className="flex h-6 items-center justify-between gap-3">
+        <div className="label min-w-0 truncate">
+          {loan ? (
+            <>
+              Advance · {g}
+              <span className="hidden sm:inline"> at origination</span>
+            </>
+          ) : (
+            `Offer · ${g}`
+          )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="hidden text-[12px] text-ink-2 sm:inline">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
-          <GradeBadge grade={g} />
-          <span className={`rounded-md border px-2 py-0.5 text-[12px] font-medium transition-colors duration-300 ${statusTone}`}>{status}</span>
+        <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[12px] font-medium transition-colors duration-300 ${statusTone}`}>{status}</span>
+      </div>
+      <div className="mt-1.5 flex h-9 items-center justify-between gap-3">
+        <div className="min-w-0 truncate font-mono text-[12px] text-ink-2">did:peaq:{shortId(state.machineId)}</div>
+        <div className="flex shrink-0 items-center gap-2" title={upgradedTo ? 'Grade at origination → current Machine Credit Rating' : undefined}>
+          <span className="text-[12px] text-ink-2">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
+          <GradeBadge grade={upgradedTo ? `${g} → ${upgradedTo}` : g} />
         </div>
       </div>
 
