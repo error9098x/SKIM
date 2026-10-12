@@ -4,3 +4,8 @@ out
 next-env.d.ts
 *.tsbuildinfo
 screenshots/*.tmp
+
+# secrets (never commit)
+.env
+.env.*
+!.env.example
