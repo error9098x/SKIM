@@ -1,0 +1,22 @@
+{
+  "_note": "Bundled demo replay. Used when no deployments/<network>.json is present. Everything rendered from this file is labelled SIMULATED.",
+  "network": "agung",
+  "machineId": "73019264855203917740628811502047419933386201551948320166237541093826640219581",
+  "machineWallet": "0x5C1a0e2b7F3d9A44c8E1B0f6D2a93E7c41B8d0A2",
+  "borrower": "0x9E4b17C3a2F05d68B1c7E39aD04f2B6e81C5a7D3",
+  "keeper": "0x2D7f90aB13c4E58e6F0a9B21cD34e7F8a0B1c2D9",
+  "contracts": {
+    "vault": "0x7a3B9e1C04dF5a2B68c9E1f03D4a7B2c5E8f9A01",
+    "router": "0x41cE8b2D7f09A3e6B5c1D48a2F7e0B9c3D6a5E12",
+    "oracle": "0xB82f4C1a9D3e07F6a5B2c8E1d4F0a7B3c6D9e523",
+    "machineNft": "0x0Fd3A6b9C2e15D8f4A7b0C3e6F9a2D5b8E1c4F34",
+    "eventRegistry": "0xE6a1D4b7C0f3A9e2B5d8C1f4A7e0B3d6C9f2A845"
+  },
+  "vaultLiquidity": "25",
+  "termDays": 30,
+  "ratingStart": { "score": 0, "grade": 0 },
+  "ratingAfterPayoff": { "score": 41, "grade": 1 },
+  "peaqUsd": 0.31,
+  "sessionsPeaq": ["0.46", "0.38", "0.52", "0.41", "0.49", "0.36", "0.55", "0.44", "0.47", "0.40"],
+  "timing": { "openAfterMs": 2600, "sessionEveryMs": 2400, "verifyAfterMs": 1200, "closeAfterMs": 900, "upgradeAfterMs": 2200, "holdAfterCloseMs": 9000 }
+}
