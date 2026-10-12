@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
-import type { Session, SkimState } from '@/lib/types';
-import { fmtToken, timeAgo } from '@/lib/format';
-import { Chip, HashRef } from './ui';
-import { activityDetail, activityLabel, isDemo, unitLabel } from './view';
+import type { Activity, Session, SkimState } from '@/lib/types';
+import { fmtToken, ratio, timeAgo } from '@/lib/format';
+import { HashRef } from './ui';
+import { activityDetail, activityLabel, isDemo, sessionSplits, unitLabel, type Split } from './view';
 
 function useNow() {
   const [now, setNow] = useState(() => Date.now() / 1000);
@@ -14,155 +14,189 @@ function useNow() {
   return now;
 }
 
-/** Verification cell: green tick only for a real EventRegistry entry; demo gets a neutral "demo hash" chip. */
-function Verified({ state, s, compact = false }: { state: SkimState; s: Session; compact?: boolean }) {
-  if (!s.verified) return <Chip>{compact ? 'pending' : 'pending keeper'}</Chip>;
-  if (isDemo(state)) return <HashRef state={state} hash={s.verified.txHash ?? s.txHash} />;
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <Chip tone="repaid" title="EventRegistry entry cites this router tx as sourceTxHash">
-        ✓ verified{compact ? '' : ` · trust ${s.verified.trustLevel ?? 1}`}
-      </Chip>
-      {/* USD only for real events; hidden in demo (we never reach here in demo) */}
-      {!compact && s.verified.valueCents !== undefined && <span className="num text-[12px] text-ink-3">${(s.verified.valueCents / 100).toFixed(2)}</span>}
-    </span>
-  );
+// Fixed box height: the feed never grows as rows arrive (zero layout shift).
+const FEED_BOX = 'h-[480px]';
+
+type Row =
+  | { kind: 'session'; key: string; ts?: number; s: Session; split: Split }
+  | { kind: 'keeper'; key: string; ts?: number; s: Session }
+  | { kind: 'action'; key: string; ts?: number; a: Activity };
+
+/** One chronological feed, newest first: sessions, the keeper's revenue-event post for each, and loan actions. */
+function buildRows(state: SkimState): Row[] {
+  const splits = sessionSplits(state);
+  const rows: { r: Row; ts: number; order: number }[] = [];
+  state.sessions.forEach((s, i) => {
+    const ts = s.timestamp ?? 0;
+    const split = splits.get(s.key) ?? { key: s.key, vault: s.skimmed, machine: s.forwarded, excess: 0n, inLoan: false };
+    rows.push({ r: { kind: 'session', key: s.key, ts: s.timestamp, s, split }, ts, order: 1000 - i });
+    if (s.verified) rows.push({ r: { kind: 'keeper', key: `${s.key}:ev`, ts: s.timestamp, s }, ts, order: 1000 - i + 0.5 });
+  });
+  state.activity.forEach((a, i) => {
+    rows.push({ r: { kind: 'action', key: `a:${a.key}`, ts: a.timestamp, a }, ts: a.timestamp ?? 0, order: 2000 - i });
+  });
+  rows.sort((x, y) => y.ts - x.ts || y.order - x.order);
+  return rows.map((x) => x.r);
 }
 
-// Fixed box heights: the feed and the ledger never grow as rows arrive (zero layout shift).
-const FEED_BOX = 'h-[440px]';
-const LEDGER_CARD = 'h-[540px]';
-
-export function RevenueFeed({ state }: { state: SkimState }) {
-  const now = useNow();
-  const unit = unitLabel(state);
-  const demo = isDemo(state);
-  const total = state.sessions.reduce((a, s) => a + s.amount, 0n);
-  const skim = state.sessions.reduce((a, s) => a + s.skimmed, 0n);
-  const fwd = state.sessions.reduce((a, s) => a + s.forwarded, 0n);
-  const verified = state.sessions.filter((s) => s.verified).length;
-
+/** Split bar: vault share (skim, orange) vs machine share. Widths are the shares of this payment. */
+function SplitBar({ amount, split }: { amount: bigint; split: Split }) {
+  const v = amount ? ratio(split.vault, amount) * 100 : 0;
   return (
-    <div className="card min-w-0 overflow-hidden">
-      <div className="grid grid-cols-2 gap-px border-b border-rule bg-rule sm:grid-cols-4">
-        {[
-          ['Sessions', String(state.sessions.length), demo ? `${verified} events posted` : `${verified} verified`, ''],
-          ['Revenue routed', fmtToken(total, 3), unit, ''],
-          ['Skimmed to vault', fmtToken(skim, 3), unit, 'text-skim-text'],
-          ['Forwarded to machine', fmtToken(fwd, 3), unit, ''],
-        ].map(([l, v, s, tone]) => (
-          <div key={l} className="min-w-0 bg-paper px-5 py-4">
-            <div className="label truncate">{l}</div>
-            <div className={`num mt-1 truncate text-xl ${tone || 'text-ink'}`}>
-              {v} <span className="text-[12px] text-ink-3">{s}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className={`${FEED_BOX} overflow-y-auto overscroll-contain`}>
-        {state.sessions.length === 0 ? (
-          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-ink-2">
-            <p>
-              Waiting for the first charging session to route through <span className="font-mono text-ink">RevenueRouter.pay()</span>…
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* desktop table */}
-            <table className="hidden w-full text-sm md:table">
-              <thead className="sticky top-0 bg-paper">
-                <tr className="border-b border-rule text-left text-[12px] text-ink-2">
-                  <th className="px-6 py-2.5 font-medium">Session</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Paid</th>
-                  <th className="px-3 py-2.5 text-right font-medium">Skim → vault</th>
-                  <th className="px-3 py-2.5 text-right font-medium">→ machine</th>
-                  <th className="px-3 py-2.5 font-medium">peaq revenue event</th>
-                  <th className="px-6 py-2.5 text-right font-medium">Router tx</th>
-                </tr>
-              </thead>
-              <tbody>
-                {state.sessions.map((s, i) => (
-                  <tr key={s.key} className={`h-[57px] border-b border-rule ${i === 0 ? 'animate-rise' : ''}`}>
-                    <td className="px-6 py-2">
-                      <div className="font-mono text-[12px] text-ink">{s.sessionId.slice(0, 10)}…</div>
-                      <div className="text-[12px] text-ink-3">{timeAgo(s.timestamp, now)}</div>
-                    </td>
-                    <td className="num px-3 py-2 text-right text-ink">{fmtToken(s.amount, 3)}</td>
-                    <td className="num px-3 py-2 text-right text-skim-text">+{fmtToken(s.skimmed, 3)}</td>
-                    <td className="num px-3 py-2 text-right text-ink-2">{fmtToken(s.forwarded, 3)}</td>
-                    <td className="px-3 py-2">
-                      <Verified state={state} s={s} />
-                    </td>
-                    <td className="px-6 py-2 text-right">
-                      <HashRef state={state} hash={s.txHash} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* mobile list */}
-            <ul className="divide-y divide-rule md:hidden">
-              {state.sessions.map((s, i) => (
-                <li key={s.key} className={`px-4 py-3 ${i === 0 ? 'animate-rise' : ''}`}>
-                  <div className="flex h-7 items-center justify-between gap-2">
-                    <span className="num whitespace-nowrap text-base text-ink">
-                      {fmtToken(s.amount, 3)} <span className="text-[12px] text-ink-3">{unit}</span>
-                    </span>
-                    <Verified state={state} s={s} compact />
-                  </div>
-                  <div className="mt-1 flex items-center justify-between gap-2 text-[12px]">
-                    <span className="num text-skim-text">+{fmtToken(s.skimmed, 3)} skim</span>
-                    <span className="num text-ink-2">{fmtToken(s.forwarded, 3)} → machine</span>
-                  </div>
-                  <div className="mt-1 flex h-6 items-center justify-between gap-2 text-[12px] text-ink-3">
-                    <span>{timeAgo(s.timestamp, now)}</span>
-                    {!demo && <HashRef state={state} hash={s.txHash} />}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
+    <div className="flex h-1.5 overflow-hidden rounded-full bg-paper-2" aria-hidden>
+      <span className="h-full bg-skim" style={{ width: `${v}%` }} />
+      <span className="h-full bg-ink-3/45" style={{ width: `${100 - v}%`, boxShadow: v > 0 ? 'inset 2px 0 0 rgb(var(--paper))' : undefined }} />
     </div>
   );
 }
 
 const ICON: Record<string, string> = { rating: '★', loan: '↗', repaid: '↺', closed: '✓', deposit: '＋', default: '!', nft: '◆' };
 
-export function ActivityLog({ state }: { state: SkimState }) {
-  const now = useNow();
-  const live = !isDemo(state);
+function SessionRow({ state, row, n, now, unit, fresh }: { state: SkimState; row: Extract<Row, { kind: 'session' }>; n: number; now: number; unit: string; fresh: boolean }) {
+  const { s, split } = row;
+  const capped = split.excess > 0n;
   return (
-    <div className={`card flex ${LEDGER_CARD} min-w-0 flex-col p-5 sm:p-6`}>
-      <div className="flex h-5 items-center justify-between">
-        <div className="label">Loan ledger</div>
-        {state.blockNumber !== undefined && <span className="num text-[12px] text-ink-3">block {state.blockNumber.toString()}</span>}
+    <li className={`flex h-[72px] items-center gap-4 px-4 sm:px-5 md:h-[60px] ${fresh ? 'animate-rise' : ''}`}>
+      <span suppressHydrationWarning className="hidden w-16 shrink-0 text-[12px] text-ink-3 md:block">
+        {timeAgo(s.timestamp, now)}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-3 text-[13px] leading-5">
+          <span className="min-w-0 truncate text-ink">
+            Session {n} <span className="font-mono text-[12px] text-ink-3">{s.sessionId.slice(0, 8)}…</span>
+            <span suppressHydrationWarning className="text-[12px] text-ink-3 md:hidden"> · {timeAgo(s.timestamp, now)}</span>
+          </span>
+          <span className="num shrink-0 text-ink">
+            {fmtToken(s.amount, 3)} <span className="text-[12px] text-ink-3">{unit}</span>
+          </span>
+        </div>
+        <div className="mt-1.5">
+          <SplitBar amount={s.amount} split={split} />
+        </div>
+        <div className="mt-1 flex items-center justify-between gap-3 text-[12px] leading-4">
+          <span className="num truncate text-skim-text">
+            +{fmtToken(split.vault, 3)} to vault{capped ? ' · capped' : ''}
+          </span>
+          <span className="num shrink-0 text-ink-2">
+            {fmtToken(split.machine, 3)} to machine{capped && <span className="hidden sm:inline"> (incl. {fmtToken(split.excess, 3)} excess)</span>}
+          </span>
+        </div>
       </div>
-      <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        {state.activity.length === 0 ? (
-          <p className="text-sm text-ink-2">No loan events yet.</p>
+      <span className="hidden w-[150px] shrink-0 justify-end md:flex">
+        <HashRef state={state} hash={s.txHash} />
+      </span>
+    </li>
+  );
+}
+
+/** Plain on-chain action row (keeper post or loan event). No agent styling: what happened, where, which tx. */
+function ActionRow({ state, glyph, text, detail, tone, hash, ts, now, indent }: { state: SkimState; glyph: string; text: string; detail?: string; tone: string; hash?: string; ts?: number; now: number; indent?: boolean }) {
+  return (
+    <li className="flex h-10 items-center gap-4 bg-paper-2/60 px-4 sm:px-5">
+      <span suppressHydrationWarning className="hidden w-16 shrink-0 text-[12px] text-ink-3 md:block">
+        {timeAgo(ts, now)}
+      </span>
+      <div className={`flex min-w-0 flex-1 items-center gap-2 text-[12px] leading-4 ${indent ? 'md:pl-4' : ''}`}>
+        <span aria-hidden className={`w-4 shrink-0 text-center ${tone}`}>
+          {glyph}
+        </span>
+        <span className={`min-w-0 truncate ${tone}`}>
+          {text}
+          {detail && <span className="text-ink-3"> · {detail}</span>}
+        </span>
+      </div>
+      <span className="hidden w-[150px] shrink-0 justify-end md:flex">
+        <HashRef state={state} hash={hash} />
+      </span>
+    </li>
+  );
+}
+
+export function RevenueFeed({ state }: { state: SkimState }) {
+  const now = useNow();
+  const unit = unitLabel(state);
+  const demo = isDemo(state);
+  const splits = sessionSplits(state);
+  const total = state.sessions.reduce((a, s) => a + s.amount, 0n);
+  let toVault = 0n;
+  let toMachine = 0n;
+  let excess = 0n;
+  for (const sp of splits.values()) {
+    toVault += sp.vault;
+    toMachine += sp.machine;
+    excess += sp.excess;
+  }
+  const verified = state.sessions.filter((s) => s.verified).length;
+  const rows = buildRows(state);
+  const sessionNo = new Map(state.sessions.map((s, i) => [s.key, state.sessions.length - i]));
+  const newest = state.sessions[0]?.key;
+
+  const kpis: [string, string, string, string][] = [
+    ['Sessions', String(state.sessions.length), demo ? `${verified} events posted` : `${verified} verified`, 'text-ink'],
+    ['Revenue routed', fmtToken(total, 3), unit, 'text-ink'],
+    ['Repaid to vault', fmtToken(toVault, 3), excess > 0n ? `${unit} · skim capped at owed` : `${unit} · skim share`, 'text-skim-text'],
+    ['Forwarded to machine', fmtToken(toMachine, 3), unit, 'text-ink'],
+  ];
+
+  return (
+    <div className="card min-w-0 overflow-hidden">
+      <div className="grid grid-cols-2 gap-px border-b border-rule bg-rule sm:grid-cols-4">
+        {kpis.map(([l, v, s, tone]) => (
+          <div key={l} className="min-w-0 bg-paper px-4 py-3 sm:px-5 sm:py-4">
+            <div className="label truncate">{l}</div>
+            <div className={`num mt-1 truncate text-xl ${tone}`}>{v}</div>
+            <div className="truncate text-[12px] text-ink-3">{s}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex h-9 items-center gap-4 border-b border-rule px-4 text-[12px] text-ink-2 sm:px-5">
+        <span className="hidden w-16 shrink-0 md:block">When</span>
+        <span className="flex min-w-0 flex-1 items-center gap-3 truncate">
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden className="h-2 w-2 rounded-sm bg-skim" />
+            vault share
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden className="h-2 w-2 rounded-sm bg-ink-3/45" />
+            machine share
+          </span>
+          <span className="hidden truncate text-ink-3 sm:inline">· on-chain actions inline</span>
+        </span>
+        <span className="hidden w-[150px] shrink-0 text-right md:block">{demo ? 'Tx (demo)' : 'Tx'}</span>
+      </div>
+
+      <div className={`${FEED_BOX} overflow-y-auto overscroll-contain`}>
+        {rows.length === 0 ? (
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-ink-2">
+            <p>
+              Waiting for the first charging session to route through <span className="font-mono text-ink">RevenueRouter.pay()</span>…
+            </p>
+          </div>
         ) : (
-          <ol className="relative ml-2.5 space-y-4 border-l border-rule pl-5">
-            {state.activity.slice(0, 8).map((a) => (
-              <li key={a.key} className="relative animate-rise">
-                <span
-                  className={`absolute -left-[31px] flex h-5 w-5 items-center justify-center rounded-full border bg-paper text-[12px] ${
-                    a.kind === 'closed' ? 'border-repaid text-repaid-text' : a.kind === 'default' ? 'border-danger text-danger' : a.kind === 'rating' ? 'border-peaq/60 text-peaq-text' : 'border-rule text-ink-2'
-                  }`}
-                >
-                  {ICON[a.kind] ?? '•'}
-                </span>
-                <div className={`text-sm ${a.kind === 'closed' ? 'text-repaid-text' : 'text-ink'}`}>{activityLabel(state, a)}</div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-ink-3">
-                  {activityDetail(state, a) && <span>{activityDetail(state, a)}</span>}
-                  <span suppressHydrationWarning>{timeAgo(a.timestamp, now)}</span>
-                  {live && a.txHash && <HashRef state={state} hash={a.txHash} />}
-                </div>
-              </li>
-            ))}
-          </ol>
+          <ul className="divide-y divide-rule">
+            {rows.map((r) => {
+              if (r.kind === 'session')
+                return <SessionRow key={r.key} state={state} row={r} n={sessionNo.get(r.s.key) ?? 0} now={now} unit={unit} fresh={r.s.key === newest} />;
+              if (r.kind === 'keeper')
+                return (
+                  <ActionRow
+                    key={r.key}
+                    state={state}
+                    glyph={demo ? '↳' : '✓'}
+                    text={`Keeper posted revenue event to EventRegistry · trust ${r.s.verified?.trustLevel ?? 1} · cites router tx`}
+                    tone={demo ? 'text-ink-2' : 'text-repaid-text'}
+                    hash={r.s.verified?.txHash}
+                    ts={r.ts}
+                    now={now}
+                    indent
+                  />
+                );
+              const a = r.a;
+              const tone = a.kind === 'closed' ? 'text-repaid-text' : a.kind === 'default' ? 'text-danger' : a.kind === 'rating' ? 'text-peaq-text' : 'text-ink';
+              return <ActionRow key={r.key} state={state} glyph={ICON[a.kind] ?? '•'} text={activityLabel(state, a)} detail={activityDetail(state, a)} tone={tone} hash={a.txHash} ts={a.timestamp} now={now} />;
+            })}
+          </ul>
         )}
       </div>
     </div>

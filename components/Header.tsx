@@ -97,8 +97,9 @@ export function Header({ state }: { state: SkimState }) {
         <div className="flex min-w-0 items-center gap-3 sm:gap-5">
           <Logo />
           <nav className="hidden items-center gap-5 text-[13px] text-ink-2 md:flex">
-            <a href="#loan" className="hover:text-ink">Credit line</a>
             <a href="#revenue" className="hover:text-ink">Revenue</a>
+            <a href="#terms" className="hover:text-ink">Terms</a>
+            <a href="#loan" className="hover:text-ink">Credit line</a>
             <a href="#how" className="hover:text-ink">How it works</a>
           </nav>
         </div>
