@@ -1,15 +1,22 @@
 import type { Config } from 'tailwindcss';
 
+// Semantic colours only. Every value is a CSS variable defined in app/globals.css
+// (:root = light paper, .inst = dark instrument scope, html.theme-dark = fallback).
+const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        ink: { 950: '#07070C', 900: '#0B0B13', 850: '#10101A', 800: '#151521', 700: '#1D1D2C', 600: '#2A2A3D', 500: '#3B3B52' },
-        fog: { 100: '#F4F3FA', 200: '#DCDAEA', 300: '#B5B2CA', 400: '#8E8AA8', 500: '#6D6987' },
-        peaq: { 300: '#C4B5FF', 400: '#A48BFF', 500: '#8B6CFF', 600: '#7350F5', 700: '#5B3BD6' },
-        mint: { 400: '#4BE3B0', 500: '#22CC94' },
-        amber: { 400: '#FFC56B' },
+        paper: { DEFAULT: v('paper'), 2: v('paper-2') },
+        rule: v('rule'),
+        ink: { DEFAULT: v('ink'), 2: v('ink-2'), 3: v('ink-3') },
+        skim: { DEFAULT: v('skim'), text: v('skim-text') },
+        repaid: { DEFAULT: v('repaid'), text: v('repaid-text') },
+        peaq: { DEFAULT: v('peaq'), text: v('peaq-text') },
+        danger: v('red'),
+        hatch: v('hatch'),
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui'],
@@ -17,13 +24,10 @@ const config: Config = {
       },
       keyframes: {
         rise: { '0%': { opacity: '0', transform: 'translateY(6px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-        flow: { '0%': { strokeDashoffset: '24' }, '100%': { strokeDashoffset: '0' } },
-        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
       },
       animation: {
-        rise: 'rise .45s ease-out both',
-        flow: 'flow 1s linear infinite',
-        shimmer: 'shimmer 2.4s linear infinite',
+        // transform/opacity only, never affects layout; 280ms inside the 180-320ms rule
+        rise: 'rise .28s ease-out both',
       },
     },
   },

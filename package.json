@@ -6,10 +6,12 @@
     "sync": "node scripts/sync.mjs",
     "predev": "node scripts/sync.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/sync.mjs",
+    "prebuild": "node scripts/sync.mjs && node scripts/contrast.mjs",
     "build": "next build",
     "start": "npx serve out",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "contrast": "node scripts/contrast.mjs --verbose"
   },
   "dependencies": {
     "next": "15.5.27",
