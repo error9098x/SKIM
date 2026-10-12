@@ -32,7 +32,16 @@ export default function Page() {
               demo ? (
                 <SimTag title="Demo replay: transactions and hashes are generated locally, not on chain">Simulated · hashes generated locally</SimTag>
               ) : (
-                <span className="text-[12px] text-ink-2">Verified = peaq revenue event citing the router tx</span>
+                <span className="truncate text-[12px] text-ink-2">
+                  {state.network.isMainnet ? (
+                    'Verified = peaq revenue event citing the router tx'
+                  ) : (
+                    <>
+                      <span className="sm:hidden">Posted = trust-1 event · mock registry (testnet)</span>
+                      <span className="hidden sm:inline">Posted = revenue event (trust 1) citing the router tx · mock registry on testnet</span>
+                    </>
+                  )}
+                </span>
               )
             }
           />

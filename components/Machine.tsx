@@ -33,7 +33,9 @@ export function MachineCard({ state }: { state: SkimState }) {
 
       <div className="mt-4 rounded-xl border border-rule bg-paper-2 p-3">
         <div className="label">DID</div>
-        <CopyText text={did} display={`did:peaq:${state.machineId.slice(0, 10)}…${state.machineId.slice(-8)}`} className="mt-1 w-full text-[13px]" />
+        {/* 390: a shorter display so digits survive truncation (full DID is what gets copied). */}
+        <CopyText text={did} display={`did:peaq:${state.machineId.slice(0, 6)}…${state.machineId.slice(-6)}`} className="mt-1 w-full text-[13px] sm:hidden" />
+        <CopyText text={did} display={`did:peaq:${state.machineId.slice(0, 10)}…${state.machineId.slice(-8)}`} className="mt-1 hidden w-full text-[13px] sm:inline-flex" />
         <div className="mt-2 h-5 text-[12px]">
           {explorerHref ? <ExtLink href={explorerHref}>Machine Explorer</ExtLink> : <span className="text-ink-3">Demo machine · not on chain</span>}
         </div>

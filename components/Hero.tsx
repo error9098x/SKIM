@@ -164,14 +164,16 @@ function FacilityCard({ state }: { state: SkimState }) {
           <div className="label truncate">
             {loan ? (
               <>
-                Advance<span className="hidden sm:inline"> · {g} at origination</span>
+                {/* Once the seal reads "Provisioned → B" it already names the origination grade: drop the duplicate so the eyebrow never truncates. */}
+                Advance{!upgradedTo && <span className="hidden sm:inline"> · {g} at origination</span>}
               </>
             ) : (
               `Offer · ${g}`
             )}
           </div>
           <div className="mt-0.5 truncate font-mono text-[12px] text-ink-2">
-            <span className="sm:hidden">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
+            {/* sans at 390: mono 'MCR · simulated' truncated beside the 'Provisioned → B' seal */}
+            <span className="font-sans sm:hidden">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
             <span className="hidden sm:inline">did:peaq:{shortId(state.machineId)}</span>
           </div>
         </div>
@@ -234,7 +236,8 @@ function FacilityCard({ state }: { state: SkimState }) {
 export function Hero({ state, onReplay }: { state: SkimState; onReplay: () => void }) {
   const explorer = realHref(state, state.contracts.vault ? addrUrl(state.network.explorer, state.contracts.vault) : state.network.explorer);
   const demo = isDemo(state);
-  const cta = 'rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-paper transition-opacity duration-200 hover:opacity-90 sm:px-5 sm:py-3';
+  // Fixed CTA height (border-box): demo <button> and live <a>s (one bordered) must be equally tall, so page height is mode-independent.
+  const cta = 'inline-flex h-10 items-center rounded-xl bg-ink px-4 text-sm font-semibold text-paper transition-opacity duration-200 hover:opacity-90 sm:h-11 sm:px-5';
   return (
     <section className="relative">
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-5 sm:px-6 sm:pt-10 lg:pb-14">
@@ -268,7 +271,7 @@ export function Hero({ state, onReplay }: { state: SkimState; onReplay: () => vo
                 </a>
               )}
               {explorer && (
-                <a href={explorer} target="_blank" rel="noreferrer" className="rounded-xl border border-rule px-4 py-2.5 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink-3 sm:px-5 sm:py-3">
+                <a href={explorer} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-xl border border-rule px-4 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink-3 sm:h-11 sm:px-5">
                   Open explorer ↗
                 </a>
               )}

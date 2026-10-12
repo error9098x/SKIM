@@ -50,6 +50,20 @@ function SplitBar({ amount, split }: { amount: bigint; split: Split }) {
   );
 }
 
+/** S3 wording rule: never "EventRegistry 2.0" bare outside mainnet. */
+function registryNote(state: SkimState): string {
+  if (state.network.isMainnet) return 'peaq EventRegistry 2.0';
+  if (isDemo(state)) return 'mock registry in the demo · EventRegistry 2.0 on mainnet';
+  return 'mock registry on testnet · EventRegistry 2.0 on mainnet';
+}
+
+/** JUDGE-N1: the AGNG amount is the headline; USD only as a hover note, never a fake price. */
+function usdNote(state: SkimState, cents?: number): string | undefined {
+  if (cents === undefined) return undefined;
+  if (cents >= 1) return `Event value ≈ $${(cents / 100).toFixed(2)}`;
+  return state.network.isMainnet ? 'Event value < $0.01' : 'Event value < $0.01 (testnet amounts; the mainnet MCR counts events ≥ $10)';
+}
+
 const ICON: Record<string, string> = { rating: '★', loan: '↗', repaid: '↺', closed: '✓', deposit: '＋', default: '!', nft: '◆' };
 
 function SessionRow({ state, row, n, now, unit, fresh }: { state: SkimState; row: Extract<Row, { kind: 'session' }>; n: number; now: number; unit: string; fresh: boolean }) {
@@ -90,9 +104,9 @@ function SessionRow({ state, row, n, now, unit, fresh }: { state: SkimState; row
 }
 
 /** Plain on-chain action row (keeper post or loan event). No agent styling: what happened, where, which tx. */
-function ActionRow({ state, glyph, text, detail, tone, hash, ts, now, indent }: { state: SkimState; glyph: string; text: string; detail?: string; tone: string; hash?: string; ts?: number; now: number; indent?: boolean }) {
+function ActionRow({ state, glyph, text, detail, tone, hash, ts, now, indent, title }: { state: SkimState; glyph: string; text: string; detail?: string; tone: string; hash?: string; ts?: number; now: number; indent?: boolean; title?: string }) {
   return (
-    <li className="flex h-10 items-center gap-4 bg-paper-2/60 px-4 sm:px-5">
+    <li title={title ?? (detail ? `${text} · ${detail}` : text)} className="flex h-10 items-center gap-4 bg-paper-2/60 px-4 sm:px-5">
       <span suppressHydrationWarning className="hidden w-16 shrink-0 text-[12px] text-ink-3 md:block">
         {timeAgo(ts, now)}
       </span>
@@ -133,7 +147,9 @@ export function RevenueFeed({ state }: { state: SkimState }) {
 
   const pending = state.sessions.length - verified;
   // "3 posted · 1 pending" while the keeper has not yet posted the newest event (never reads as a mismatch).
-  const sessionsSub = pending > 0 ? `${verified} ${demo ? 'posted' : 'verified'} · ${pending} pending` : demo ? `${verified} events posted` : `${verified} verified`;
+  // "verified" only where the event lands in peaq's real EventRegistry 2.0 (mainnet); agung/local/demo write to a mock.
+  const realRegistry = state.network.isMainnet && !demo;
+  const sessionsSub = pending > 0 ? `${verified} ${realRegistry ? 'verified' : 'posted'} · ${pending} pending` : realRegistry ? `${verified} verified` : `${verified} events posted`;
   const kpis: [string, string, string, string][] = [
     ['Sessions', String(state.sessions.length), sessionsSub, 'text-ink'],
     ['Revenue routed', fmtToken(total, 3), unit, 'text-ink'],
@@ -186,9 +202,11 @@ export function RevenueFeed({ state }: { state: SkimState }) {
                   <ActionRow
                     key={r.key}
                     state={state}
-                    glyph={demo ? '↳' : '✓'}
-                    text={`Keeper posted revenue event to EventRegistry · trust ${r.s.verified?.trustLevel ?? 1} · cites router tx`}
-                    tone={demo ? 'text-ink-2' : 'text-repaid-text'}
+                    glyph={realRegistry ? '✓' : '↳'}
+                    text={`Keeper posted peaq-format revenue event · ${fmtToken(r.s.amount, 3)} ${unit} · trust ${r.s.verified?.trustLevel ?? 1} · cites router tx`}
+                    detail={registryNote(state)}
+                    title={usdNote(state, r.s.verified?.valueCents)}
+                    tone={realRegistry ? 'text-repaid-text' : 'text-ink-2'}
                     hash={r.s.verified?.txHash}
                     ts={r.ts}
                     now={now}

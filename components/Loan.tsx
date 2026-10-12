@@ -148,7 +148,8 @@ export function TermsCurve({ state }: { state: SkimState }) {
           <div className="label">Line size by grade</div>
           <div className="mt-1 text-sm text-ink-2">Better rating, bigger line, lighter skim.</div>
         </div>
-        <Chip title={state.termsSource === 'chain' ? 'Read from SkimVault.terms()' : 'Spec table (vault does not expose terms())'}>
+        {/* fixed chip width: 'on-chain' vs 'vault schedule' must not change how the subtitle wraps (mode-independent height) */}
+        <Chip className="w-28 justify-center" title={state.termsSource === 'chain' ? 'Read from SkimVault.terms()' : 'Spec table (vault does not expose terms())'}>
           {state.termsSource === 'chain' ? 'on-chain' : 'vault schedule'}
         </Chip>
       </div>
