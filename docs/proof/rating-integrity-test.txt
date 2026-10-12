@@ -1,0 +1,4 @@
+# agent/scripts/test-rating-integrity.sh  (2026-10-12 IST) — security finding F1 regression test
+raw registry count=23 (grade if trusted: 4, score 76)
+keeper-counted=3 (grade 0, score 36)
+PASS: 20 spoofed events ignored; only router-backed trust-1 events count

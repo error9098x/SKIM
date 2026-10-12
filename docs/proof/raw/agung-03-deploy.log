@@ -1,0 +1,9 @@
+[16:48:33] deploy    network=agung chain=9990 deployer=0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e balance=2.6000 AGNG
+[16:48:33] deploy    using activated machine from /workspace/projects/71e88dc8-490f-432d-bbff-87762c281e72/work/skim/deployments/agung.machine.json: id=76267944138051173729075493922440340318793428579787092462435695099982000366194
+[16:48:37] deploy    MCROracle          0x90DD1c0C498243425dE0B93B6c7aa79bde15B793  https://agung-testnet.subscan.io/tx/0xb80a0f6ebdae84f6ef4049386d291fed41e8b465de67458ef07e1949e306168c
+[16:48:50] deploy    SkimVault          0xA97b3C4F7cf5468dB2507C5769ad973e02F33D20  https://agung-testnet.subscan.io/tx/0x184f72362de83214f0408559429ae55e19a18a92ef3d79fd37dc4cc022507b44
+[16:48:54] deploy    RevenueRouter      0xeD420FD5Ea0df60d2f873F13e34B4F5edbB99237  https://agung-testnet.subscan.io/tx/0x692516a4cbf174e64fb86b97e9d23d4f275f753b75827558b06fa833e3e80666
+[16:49:01] deploy    MockEventRegistry  0xB91b34B2a0e16fE3D0889eDBc2f1a82d088C51e1  https://agung-testnet.subscan.io/tx/0x0832b83e6991841c8f867c3ae2de70d869abc2da23121c0f557a971efbc523b3
+[16:49:08] deploy    scaled principal table by 1/10
+[16:49:12] deploy    seeded vault with 0.5 AGNG  https://agung-testnet.subscan.io/tx/0xb8d05e216e08238eb9557a988e41edf9a798689e76b1d435c80bd53457f28af8
+[16:49:12] deploy    wrote /workspace/projects/71e88dc8-490f-432d-bbff-87762c281e72/work/skim/deployments/agung.json

@@ -1,0 +1,36 @@
+{
+  "name": "skim-agent",
+  "version": "0.1.0",
+  "description": "SKIM keeper, simulator and deploy scripts",
+  "scripts": {
+    "artifacts": "tsx scripts/build-artifacts.ts",
+    "build:contracts": "cd ../contracts && forge build && cd ../agent && tsx scripts/build-artifacts.ts",
+    "deploy": "tsx scripts/deploy.ts",
+    "activate": "tsx scripts/activate.ts",
+    "keeper": "tsx src/keeper.ts",
+    "simulator": "tsx src/simulator.ts",
+    "demo": "tsx src/demo.ts",
+    "typecheck": "tsc -p .",
+    "local:e2e": "bash scripts/local-e2e.sh",
+    "open-loan": "tsx scripts/open-loan.ts",
+    "status": "tsx scripts/status.ts",
+    "agung:launch": "tsx scripts/agung-launch.ts",
+    "test:rating": "bash scripts/test-rating-integrity.sh"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@peaqos/peaq-os-sdk": "^0.11.2",
+    "dotenv": "^18.0.7",
+    "viem": "^2.57.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,4 @@
+[17:15:01] fund      deployer 0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e 2.021999984117593088 AGNG
+[17:15:01] fund      customer 0x0c9Aa6ea0e037F33225A3d1110790867F841E39d 0.049999998931110912 AGNG  gasPrice 1024 wei
+[17:15:01] fund      sweep customer -> deployer 0.049999998888102912 AGNG, est gas 21000 (fee ≤ 0.000000000043008)
+[17:15:08] fund      status success block 11138300  https://agung-testnet.subscan.io/tx/0x42f614db0c6a46b825c7d0ff5fb0df03e4ac64700915f2f9efd5ea81dfe7be52

@@ -1,0 +1,11 @@
+machine 72561575582965553683137700019813286209432074009315708090931442830464877630283 owner 0x8725C29f4216ec368Ac920A3097DCB916Aad068f
+oracle 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 vault 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 router 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707
+after openLoan: NFT owner = 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9  (vault 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9)
+machine wallet balance = 0.010000000000000000
+loan status (2=repaid): closed
+after payoff: NFT owner = 0x8725C29f4216ec368Ac920A3097DCB916Aad068f
+PASS: real Machine NFT escrowed and returned
+controller before escrow: 0x8725C29f4216ec368Ac920A3097DCB916Aad068f
+owner during loan: SkimVault 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9; controller during loan: 0x8725C29f4216ec368Ac920A3097DCB916Aad068f (unchanged)
+EventRegistry 2.0 0xA1e7F1d7B24dAb55Dc92491e6d9B89F6E925Ad1e getEventCount 0 -> submitEvent(trust 1, sourceChainId 3338) from controller while escrowed: status 1 -> getEventCount 1; getEventAt returns sourceTxHash
+(anvil fork of peaq mainnet at block ~11954840, 2026-10-12; nothing broadcast to peaq)

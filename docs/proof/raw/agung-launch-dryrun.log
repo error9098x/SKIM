@@ -1,0 +1,9 @@
+SKIM agung launcher  mode=DRY RUN (sends nothing)
+wallet 0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e  balance 2.08999998919967232 AGNG  budget 2.5 AGNG  estimated need 0.01 AGNG
+  [done] 1 activate  machine 76267944… exists, owner 0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e
+  [done] 2 deploy    vault 0xA97b3C4F7cf5468dB2507C5769ad973e02F33D20 live, 0.51 AGNG liquidity
+  [done] 3 rate      rating already posted
+  [done] 4 loan      loan status repaid (REOPEN=1 to borrow again)
+  [done] 5 run       no active loan
+  [TODO] 6 publish   sync deployments/agung.json -> web/public/deployments
+dry run complete. Re-run with --go to execute the TODO steps.

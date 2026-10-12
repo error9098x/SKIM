@@ -1,0 +1,5 @@
+[17:09:23] borrower  approved vault for NFT  https://agung-testnet.subscan.io/tx/0x073f008ef99216e404a323a3c91bfa665c148c59a4003598d46a1c8657008a27
+[17:09:37] borrower  LOAN OPENED: NFT escrowed, 0.2000 AGNG advanced to 0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e; owes 0.2180 AGNG, skim 28%  https://agung-testnet.subscan.io/tx/0x35ccdad22846286067b810c7ff8cdc30029f1c5a569142256032fd1c7bea9692
+[17:09:37] status    machine did:peaq:76267944138051173729075493922440340318793428579787092462435695099982000366194
+[17:09:37] status    rating  B score=46 [SIMULATED]  -> quote 0.2000 AGNG fee 9% skim 28%
+[17:09:37] status    loan    active  repaid 0.0000 AGNG / owed 0.2180 AGNG  NFT owner: SkimVault (escrow)

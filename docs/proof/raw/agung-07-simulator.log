@@ -1,0 +1,11 @@
+[16:50:08] charger   EV charger online: machine 76267944138051173729075493922440340318793428579787092462435695099982000366194, 0.0500 AGNG per session every 4s
+[16:50:12] charger   session #1 kWh≈12.7 paid 0.0500 AGNG -> skim 0.0150 AGNG to vault, 0.0350 AGNG to machine  [repaid 0.0000 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0xec6c4a448a81f0b07070b944ddd9abcb96ad06a32d2f674e71ea225f00f42261
+[16:50:24] charger   session #2 kWh≈12.9 paid 0.0500 AGNG -> skim 0.0150 AGNG to vault, 0.0350 AGNG to machine  [repaid 0.0300 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0x8e0229643b1924d797bd548ea687b1e3bf02ead54fa940133262968ef35dc861
+[16:50:38] charger   session #3 kWh≈26.6 paid 0.0500 AGNG -> skim 0.0150 AGNG to vault, 0.0350 AGNG to machine  [repaid 0.0450 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0x33086a5c33c08f8e5ac98bf3da3d4d47027dec652fcf97e43b591524f19ea8eb
+[16:50:50] charger   session #4 kWh≈24.3 paid 0.0500 AGNG -> skim 0.0150 AGNG to vault, 0.0350 AGNG to machine  [repaid 0.0600 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0xc95cb7130a04e962a2a5fe833039069a7b1499cae2b2fbba8c0ed31dac02346c
+[16:51:01] charger   session #5 kWh≈27.1 paid 0.0500 AGNG -> skim 0.0150 AGNG to vault, 0.0350 AGNG to machine  [repaid 0.0750 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0x14d6e6d49e365f5dcbd2cc296de592ed940e076a7beb2d620da358c1c211ed66
+[16:51:13] charger   session #6 kWh≈17.7 paid 0.0500 AGNG -> skim 0.0150 AGNG to vault, 0.0350 AGNG to machine  [repaid 0.0900 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0x535490674eb1254b9b66334d987eda7c1e0f9507a6913a1792ceedd80380f93f
+[16:51:24] charger   session #7 kWh≈12.4 paid 0.0500 AGNG -> skim 0.0150 AGNG to vault, 0.0350 AGNG to machine  [repaid 0.1050 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0x35522e3f327ae2ad8f7bc86c74d33f16ce90e482f7f432a38d16798cda684943
+[16:51:36] charger   session #8 kWh≈14.3 paid 0.0500 AGNG -> skim 0.0050 AGNG to vault, 0.0450 AGNG to machine  [repaid 0.1100 AGNG/0.1100 AGNG]  https://agung-testnet.subscan.io/tx/0xb8fa6774b9388ae69a672739bc91c182fa68686da6dae011c5b3fc8a8b672995
+[16:51:36] charger   LOAN REPAID IN FULL: Machine NFT returned to borrower
+[16:51:36] charger   done after 8 sessions

@@ -1,0 +1,12 @@
+# MCR API live call, read-only (captured by docs role, 2026-10-12 22:38 IST)
+# machine = the real mainnet Machine NFT used in mainnet-fork-escrow.txt
+$ curl -s https://mcr.peaq.xyz/mcr/did:peaq:72561575582965553683137700019813286209432074009315708090931442830464877630283
+{"did":"did:peaq:72561575582965553683137700019813286209432074009315708090931442830464877630283","machine_id":"72561575582965553683137700019813286209432074009315708090931442830464877630283","mcr_score":0,"mcr":"Provisioned","mcr_degraded":false,"bond_status":"bonded","negative_flag":false,"event_count":0,"revenue_event_count":0,"activity_event_count":0,"revenue_trend":"insufficient","total_revenue":0,"average_revenue_per_event":0,"last_updated":null}
+# fields SKIM reads: mcr (grade) and mcr_score; a fresh machine with no events is 'Provisioned' / 0, which is why SKIM has a starter line
+
+# --- independent re-capture by chain role, 2026-10-12 22:41 IST (status line + body; same machine) ---
+$ curl -sS -i https://mcr.peaq.xyz/mcr/did:peaq:72561575582965553683137700019813286209432074009315708090931442830464877630283
+HTTP/2 200 
+date: Mon, 12 Oct 2026 17:10:59 GMT
+content-type: application/json
+{"did":"did:peaq:72561575582965553683137700019813286209432074009315708090931442830464877630283","machine_id":"72561575582965553683137700019813286209432074009315708090931442830464877630283","mcr_score":0,"mcr":"Provisioned","mcr_degraded":false,"bond_status":"bonded","negative_flag":false,"event_count":0,"revenue_event_count":0,"activity_event_count":0,"revenue_trend":"insufficient","total_revenue":0,"average_revenue_per_event":0,"last_updated":null}

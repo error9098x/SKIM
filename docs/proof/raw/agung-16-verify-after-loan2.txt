@@ -1,0 +1,10 @@
+block 11138301n
+MachineRegistry.ownerOf = 0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e
+SkimVault.isActive = false
+SkimVault.quote (principal,feeBps,skimBps,grade) = 500000000000000000, 700, 2200, 3
+SkimVault.totalRepaid = 0.328
+MCROracle.getRating = {"score":62,"grade":3,"updatedAt":"1791825126","simulated":true}
+MockEventRegistry.revenueEventCount (raw) = 16
+balance deployer 0x285a 2.071999983005696
+balance customer 0x0c9A 0.000000000021504
+balance SkimVault 0.528

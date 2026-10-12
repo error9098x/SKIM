@@ -1,0 +1,80 @@
+starting anvil (block time 1s)
+wrote artifacts for SkimVault, RevenueRouter, MCROracle, MockMachineNFT, MockEventRegistry
+[12:01:49] deploy    network=local chain=31337 deployer=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 balance=10000.0000 ETH
+[12:01:49] deploy    MCROracle          0x5FbDB2315678afecb367f032d93F642f64180aa3  0xb54844df5b4ff566a4785a985b40cb0ff4e468b9335343e7fc69a60985615761
+[12:01:50] deploy    MockMachineNFT     0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512  0xde66b1f6f8a4ae3cf6e2df40bedbeaf5fbca13034b01cbde71d3e1d87c81bd24
+[12:01:51] deploy    SkimVault          0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0  0x1904d63b974efeb73f55f417a88ecd179c7e5b863b6e409229f12122b443c497
+[12:01:52] deploy    RevenueRouter      0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9  0x2b65c4c54fc69de94eb97d8a3ba5c90405579a9e80d2767dcfa748f56bc7f195
+[12:01:53] deploy    MockEventRegistry  0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9  0x2ab86cfd7fde2e2e9b1ffc63f35cade347ffcd1e999c024a93a8a914a0fe8a30
+[12:01:54] deploy    seeded vault with 5 ETH  0x899ec443a54e1f3c5eda50bba0dffdef1ae0c7da103232ca4a689ac285083f96
+[12:01:54] deploy    wrote /workspace/projects/95603b9b-630b-4ac4-9c09-ab218185ffcb/skim/deployments/local.json
+[12:01:54] deploy    next: npm run activate   (mints/activates the machine and records machineId)
+[12:01:56] activate  SIMULATED activation: minted mock Machine NFT 6782870314936954944990778862549772031712501852987170625972520698251077912076 to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC  0x683ba1cb08a23910bce2799019cf1472a760151a1ab0cfeb6482ebb5ea6e7754
+[12:01:56] activate  did:peaq:6782870314936954944990778862549772031712501852987170625972520698251077912076 recorded in /workspace/projects/95603b9b-630b-4ac4-9c09-ab218185ffcb/skim/deployments/local.json
+6782870314936954944990778862549772031712501852987170625972520698251077912076
+[12:01:58] demo      === SKIM demo on local (SIMULATED rating + event registry) ===
+[12:01:58] demo      machine did:peaq:6782870314936954944990778862549772031712501852987170625972520698251077912076
+[12:01:58] demo      rating  Provisioned score=0  -> quote 1.0000 ETH fee 10% skim 30%
+[12:01:58] demo      loan    none  repaid 0.0000 ETH / owed 0.0000 ETH  NFT owner: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+[12:01:58] demo      --- step 1: keeper posts the machine's credit rating ---
+[12:01:58] oracle    posted Provisioned (score 0) SIMULATED  0xf39474be500a9ae4503a7bd49a25b21b407cf42ba7a3311f0ded1779474982d4
+[12:01:58] demo      terms for Provisioned: principal 1.0000 ETH, fee 10%, skim 30%
+[12:01:58] demo      --- step 2: operator escrows the Machine NFT and takes the advance ---
+[12:01:59] borrower  approved vault for NFT  0x95ae056800ffc01e8fc50f24a1062432be30f7b499f24ec81cdeba0e5f2e5f47
+[12:02:00] borrower  LOAN OPENED: NFT escrowed, 1.0000 ETH advanced to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC; owes 1.1000 ETH, skim 30%  0xbe3644f3665a1360495bf9ffe37c9c9857c0f73ef828ae8d100da4df70ef7ee9
+[12:02:00] demo      machine did:peaq:6782870314936954944990778862549772031712501852987170625972520698251077912076
+[12:02:00] demo      rating  Provisioned score=0 [SIMULATED]  -> quote 1.0000 ETH fee 10% skim 30%
+[12:02:00] demo      loan    active  repaid 0.0000 ETH / owed 1.1000 ETH  NFT owner: SkimVault (escrow)
+[12:02:00] demo      --- step 3: EV charging sessions pay through the RevenueRouter ---
+[12:02:01] demo      session #1: 0.5000 ETH -> skim 0.1500 ETH | machine 0.3500 ETH | repaid 0.1500 ETH/1.1000 ETH
+[12:02:02] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0xcb514ada…  0x4e9d9f4d39e020d36fba6bb141c66fc94619dbb21d59966c68ba76084e047999
+[12:02:03] demo      session #2: 0.5000 ETH -> skim 0.1500 ETH | machine 0.3500 ETH | repaid 0.3000 ETH/1.1000 ETH
+[12:02:04] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0xe2225a3c…  0xac60f7b21e1c0076a2029575ac6e4c164c9dbd027304789d4728a11627a60e3c
+[12:02:05] demo      session #3: 0.5000 ETH -> skim 0.1500 ETH | machine 0.3500 ETH | repaid 0.4500 ETH/1.1000 ETH
+[12:02:06] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0x9aaa3afa…  0x8321606a95688057888857c416672a4ef66f6bad890735989afc8eb15291aea4
+[12:02:07] demo      session #4: 0.5000 ETH -> skim 0.1500 ETH | machine 0.3500 ETH | repaid 0.6000 ETH/1.1000 ETH
+[12:02:08] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0x7147ec6d…  0xe99a0c84d4b308b2fa4a5348856424ad2868f895267f67ee45d69db91afe2f2e
+[12:02:09] demo      session #5: 0.5000 ETH -> skim 0.1500 ETH | machine 0.3500 ETH | repaid 0.7500 ETH/1.1000 ETH
+[12:02:10] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0x77a379f3…  0x97c01f7c74e08523caa8242a15dd28b7bef7386da41489dd13b1f93960034c49
+[12:02:11] demo      session #6: 0.5000 ETH -> skim 0.1500 ETH | machine 0.3500 ETH | repaid 0.9000 ETH/1.1000 ETH
+[12:02:12] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0xcaf9bccc…  0xb715fb2c62bfa5c818d9ba17470fae2325c87022df467f1cc6fe98c691d1e2e3
+[12:02:13] demo      session #7: 0.5000 ETH -> skim 0.1500 ETH | machine 0.3500 ETH | repaid 1.0500 ETH/1.1000 ETH
+[12:02:14] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0xb1c678a9…  0x7e2fdee522b7c39d13f72a9ae73ab10b3c6cf60986f3433fd2dfbd215c3f229e
+[12:02:15] demo      session #8: 0.5000 ETH -> skim 0.0500 ETH | machine 0.4500 ETH | repaid 1.1000 ETH/1.1000 ETH
+[12:02:16] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0xc603894e…  0xf8345d7e233c5423a8ffb5e2a6ed6c81d3c67087c6fae8de27eb732cda4aba42
+[12:02:16] demo      --- step 4: loan repaid, NFT returned ---
+[12:02:16] demo      NFT owner is now 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC (operator 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC) -> RETURNED ✔
+[12:02:16] demo      --- step 5: verified revenue feeds the rating, which unlocks better terms ---
+[12:02:16] demo      MockEventRegistry holds 8 trust-1 revenue events for this machine
+[12:02:17] oracle    posted B (score 46) SIMULATED  0x7aef8c3a045cbfb2291ecde5df24e9d0232b7e80e10d92ca169692def5049780
+[12:02:17] demo      new terms for B: principal 2.0000 ETH, fee 9%, skim 28%
+[12:02:17] demo      machine did:peaq:6782870314936954944990778862549772031712501852987170625972520698251077912076
+[12:02:17] demo      rating  B score=46 [SIMULATED]  -> quote 2.0000 ETH fee 9% skim 28%
+[12:02:17] demo      loan    repaid  repaid 1.1000 ETH / owed 1.1000 ETH  NFT owner: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+[12:02:17] demo      === done in 8 sessions ===
+--- second loan via standalone keeper + simulator ---
+[12:02:19] borrower  approved vault for NFT  0x6a35d92ce03fe2b894b79c6534347c2ce9150a316b3751f5742fe8999d4295f6
+[12:02:20] borrower  LOAN OPENED: NFT escrowed, 2.0000 ETH advanced to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC; owes 2.1800 ETH, skim 28%  0xff5837e2bd2e0b808c7af34b0dbf98a34ae8506d7664f75f84ca3a142e6510f7
+[12:02:20] status    machine did:peaq:6782870314936954944990778862549772031712501852987170625972520698251077912076
+[12:02:20] status    rating  B score=46 [SIMULATED]  -> quote 2.0000 ETH fee 9% skim 28%
+[12:02:20] status    loan    active  repaid 0.0000 ETH / owed 2.1800 ETH  NFT owner: SkimVault (escrow)
+[12:02:22] charger   EV charger online: machine 6782870314936954944990778862549772031712501852987170625972520698251077912076, 0.5000 ETH per session every 1s
+[12:02:23] charger   session #1 kWh≈12.6 paid 0.5000 ETH -> skim 0.1400 ETH to vault, 0.3600 ETH to machine  [repaid 0.1400 ETH/2.1800 ETH]  0x4dbcfb1cc089820a345de880624b87726a0ee9d0c89114fe4cde74a88af4b7ab
+[12:02:25] charger   session #2 kWh≈12.8 paid 0.5000 ETH -> skim 0.1400 ETH to vault, 0.3600 ETH to machine  [repaid 0.2800 ETH/2.1800 ETH]  0xb3b57fc72cfbdc062b50fbcfccfea1d2af2a165aa023e0a0ec07a09579d65408
+[12:02:27] charger   session #3 kWh≈29.0 paid 0.5000 ETH -> skim 0.1400 ETH to vault, 0.3600 ETH to machine  [repaid 0.4200 ETH/2.1800 ETH]  0x48e6b3ecbc7ed8a6842ec798777cd466abb3376307a10ec9d9fad9204038e1b2
+[12:02:29] charger   session #4 kWh≈12.3 paid 0.5000 ETH -> skim 0.1400 ETH to vault, 0.3600 ETH to machine  [repaid 0.5600 ETH/2.1800 ETH]  0x5457532764e277dab0faa6dbf088525e58524f0083f9cd60302100a9ca3a0266
+[12:02:31] charger   session #5 kWh≈23.2 paid 0.5000 ETH -> skim 0.1400 ETH to vault, 0.3600 ETH to machine  [repaid 0.7000 ETH/2.1800 ETH]  0x6f3362dabd0f2f06cceda287060003b49a3f101d7ef92212c8ff2a845ff40a66
+[12:02:33] charger   session #6 kWh≈20.1 paid 0.5000 ETH -> skim 0.1400 ETH to vault, 0.3600 ETH to machine  [repaid 0.8400 ETH/2.1800 ETH]  0x3a246bfab45b84df9cddce4d32e54f2b2c1bba0dbc48f912a7f66e041e1064d2
+[12:02:33] charger   done after 6 sessions
+[12:02:28] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0xb3b57fc7…  0x5e5c20760d75b865e4a5d8fdb7a18fb72323ce421704128c5365f5fe6302e953
+[12:02:29] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0x48e6b3ec…  0xe9aa8005b50a92aa8ac25cda37c61b3cb2d96147c1346693b4e0d05f9eca123d
+[12:02:29] keeper    processed 2 routed payment(s)
+[12:02:32] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0x54575327…  0xd42027e84f54ed8bfd679f6b0e2a37eb1a78e7a1daaecea3ad19b4ee1c9a131e
+[12:02:33] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0x6f3362da…  0x1d3b48214c3132b2f79647b61b8c8f9bc400e040db1398a7a84b9aa894e17131
+[12:02:33] keeper    processed 2 routed payment(s)
+[12:02:36] keeper    revenue event (SIMULATED registry) $0.02 trust=1 cites router tx 0x3a246bfa…  0xaa122a3dcbdc50795af65373729bf67671ee0eec9b240ba1f44b7cac4f5ccf5f
+[12:02:36] keeper    processed 1 routed payment(s)
+[12:02:43] status    machine did:peaq:6782870314936954944990778862549772031712501852987170625972520698251077912076
+[12:02:43] status    rating  B score=46 [SIMULATED]  -> quote 2.0000 ETH fee 9% skim 28%
+[12:02:43] status    loan    active  repaid 0.8400 ETH / owed 2.1800 ETH  NFT owner: SkimVault (escrow)
+deployments/local.json + deployments/abis.json are ready for the web app

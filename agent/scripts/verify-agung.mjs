@@ -1,0 +1,14 @@
+import { createPublicClient, http, formatEther, parseAbi } from "viem";
+const pub = createPublicClient({ transport: http("https://peaq-agung.api.onfinality.io/public") });
+const id = 76267944138051173729075493922440340318793428579787092462435695099982000366194n;
+const a = parseAbi(["function ownerOf(uint256) view returns (address)","function isActive(uint256) view returns (bool)","function getRating(uint256) view returns ((uint8 score,uint8 grade,uint64 updatedAt,bool simulated))","function revenueEventCount(uint256) view returns (uint256)","function quote(uint256) view returns (uint256,uint16,uint16,uint8)","function totalRepaid() view returns (uint256)"]);
+const V="0xA97b3C4F7cf5468dB2507C5769ad973e02F33D20";
+const r = (address, functionName) => pub.readContract({ address, abi: a, functionName, args: functionName==="totalRepaid"?[]:[id] });
+console.log("block", await pub.getBlockNumber());
+console.log("MachineRegistry.ownerOf =", await r("0x538da35489B1F0035799a8351E67835ae4ABb377","ownerOf"));
+console.log("SkimVault.isActive =", await r(V,"isActive"));
+console.log("SkimVault.quote (principal,feeBps,skimBps,grade) =", (await r(V,"quote")).map(String).join(", "));
+console.log("SkimVault.totalRepaid =", formatEther(await r(V,"totalRepaid")));
+console.log("MCROracle.getRating =", JSON.stringify(await r("0x90DD1c0C498243425dE0B93B6c7aa79bde15B793","getRating"),(k,v)=>typeof v==="bigint"?v.toString():v));
+console.log("MockEventRegistry.revenueEventCount (raw) =", String(await r("0xB91b34B2a0e16fE3D0889eDBc2f1a82d088C51e1","revenueEventCount")));
+for (const [n,x] of [["deployer 0x285a",'0x285a7ad23cdC47B11eefd1Bb9A4905a120dC066e'],["customer 0x0c9A",'0x0c9Aa6ea0e037F33225A3d1110790867F841E39d'],["SkimVault",V]]) console.log("balance", n, formatEther(await pub.getBalance({address:x})));

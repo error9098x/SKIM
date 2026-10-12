@@ -1,0 +1,15 @@
+# peaqOS SDK read-only smoke test on peaq MAINNET (captured by docs role, 2026-10-12 22:38 IST)
+# throwaway random key generated in-process; nothing is signed or broadcast
+$ cd agent && NETWORK=mainnet npx tsx scripts/sdk-smoke.ts
+client ok: 0xe1478Cb18ad2870198e107Fa7b6aea070E795509 mode: tokenomics20
+activate params valid; local machineId = 6782870314936954944990778862549772031712501852987170625972520698251077912076
+preview: {
+  machineId: '6782870314936954944990778862549772031712501852987170625972520698251077912076',
+  bond: '470341886814106305',
+  net: '470341886814106305'
+}
+sdk machineId matches local derivation: true
+submitEvent params valid (trust 1, sourceChainId 3338 )
+MCR API 200 {"did":"did:peaq:108934426058480933785963234320575706003575332367737915173645220784539698794848","machine_id":"108934426058480933785963234320575706003575332367737915173645220784539698794848","mcr_score":0,"mcr":"Provisioned","mcr_degraded":false,"bond_status":"bonded","negative_flag":false,"event_count":0,"revenue_event_count":0,"activity_event_count":0,"revenue_trend":"insufficient","total_revenu
+exit 0
+# bond 470341886814106305 wei = 0.4703 PEAQ (Entry tier). Activation is priced in USD, so the PEAQ amount moves with the PEAQ price (README earlier quoted 0.4713 from a previous run).

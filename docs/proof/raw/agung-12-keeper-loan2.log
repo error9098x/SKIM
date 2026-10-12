@@ -1,0 +1,14 @@
+[17:09:51] keeper    network=agung mode=SIMULATED (MockEventRegistry + derived rating) machine=76267944138051173729075493922440340318793428579787092462435695099982000366194
+[17:10:07] keeper    revenue event (SIMULATED registry) 0.1000 AGNG ≈ $0.0043 [value field 0¢ (sub-cent testnet session)] skim 0.0280 AGNG payer 0x0c9A…E39d trust=1 cites router tx 0xd654a2df…  https://agung-testnet.subscan.io/tx/0x51187f0c4acb135ad62cd6cdaf04e4df7c8c9d829602a5a4f5c885223fd4ae7f
+[17:10:07] keeper    processed 1 routed payment(s)
+[17:10:20] keeper    revenue event (SIMULATED registry) 0.1000 AGNG ≈ $0.0043 [value field 0¢ (sub-cent testnet session)] skim 0.0280 AGNG payer 0x0c9A…E39d trust=1 cites router tx 0x3861adf5…  https://agung-testnet.subscan.io/tx/0x59710bfb362710419b149c7596e0a7b17d97f8453453ea53b249677423ead072
+[17:10:20] keeper    processed 1 routed payment(s)
+[17:10:24] oracle    posted B (score 48) SIMULATED  https://agung-testnet.subscan.io/tx/0xfecc5676f7a12937ae46bf294b01a5478f2d4ac501ab1e78f345f75819572e8e
+[17:10:37] keeper    revenue event (SIMULATED registry) 0.1000 AGNG ≈ $0.0043 [value field 0¢ (sub-cent testnet session)] skim 0.0280 AGNG payer 0x0c9A…E39d trust=1 cites router tx 0x5203e0f3…  https://agung-testnet.subscan.io/tx/0xbd73e040ad6c1a769e9f1f8b2c6d81b79b2aa77207ef58ce2c3b52e6ba6773bf
+[17:10:37] keeper    processed 1 routed payment(s)
+[17:10:50] keeper    revenue event (SIMULATED registry) 0.1000 AGNG ≈ $0.0043 [value field 0¢ (sub-cent testnet session)] skim 0.0280 AGNG payer 0x0c9A…E39d trust=1 cites router tx 0xdc8bcba4…  https://agung-testnet.subscan.io/tx/0x6aceff60594e3fd9c1d0a6141aa97ffe45a710e2ac04db87a86980db4d9f5dc5
+[17:10:50] keeper    processed 1 routed payment(s)
+[17:10:54] oracle    posted BB (score 54) SIMULATED  https://agung-testnet.subscan.io/tx/0x828a06eb61d52f922319a383ee9da08d49743888d08ee85327992454ff92808a
+[17:11:07] keeper    revenue event (SIMULATED registry) 0.1000 AGNG ≈ $0.0043 [value field 0¢ (sub-cent testnet session)] skim 0.0280 AGNG payer 0x0c9A…E39d trust=1 cites router tx 0xf51ce85c…  https://agung-testnet.subscan.io/tx/0x526f9d5f3008e0db1f6a72ac1fdc186e2e975b2172b3c10de475fe411ed69adb
+[17:11:14] keeper    revenue event (SIMULATED registry) 0.1000 AGNG ≈ $0.0043 [value field 0¢ (sub-cent testnet session)] skim 0.0280 AGNG payer 0x0c9A…E39d trust=1 cites router tx 0xd128bfa3…  https://agung-testnet.subscan.io/tx/0xa0596a91b51a35e02ff7e7a9508e4ac8eadff23f21c59d5a3175b74d5e3950a8
+[17:11:14] keeper    processed 2 routed payment(s)

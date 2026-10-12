@@ -1,0 +1,15 @@
+# peaq MAINNET-FORK escrow check  (2026-10-12 22:51 IST, re-run after sandbox reset; forge/anvil/cast 1.8.5)
+# anvil --fork-url https://quicknode1.peaq.xyz --port 8546 --hardfork london --no-storage-caching  (chain 3338, fork block 11957700); nothing broadcast to peaq
+# real Economics 2.0 MachineRegistry 0x64b93Cc29b251fAFa83BD110cDB1C24207f85536; machineId = same real mainnet machine as the 22:26 run
+# deployer/borrower on the fork = anvil's public dev account 0xf39F…2266 + impersonated real owner; no real keys used
+$ bash script/fork-escrow-check.sh 72561575582965553683137700019813286209432074009315708090931442830464877630283
+machine 72561575582965553683137700019813286209432074009315708090931442830464877630283 owner 0x8725C29f4216ec368Ac920A3097DCB916Aad068f
+oracle 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 vault 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 router 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707
+after openLoan: NFT owner = 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9  (vault 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9)
+machine wallet balance = 0.010000000000000000
+loan status (2=repaid): closed
+after payoff: NFT owner = 0x8725C29f4216ec368Ac920A3097DCB916Aad068f
+PASS: real Machine NFT escrowed and returned
+# exit code 0
+
+# previous run (2026-10-12 22:26 IST, fork block 11957489) gave the identical PASS; superseded by this file

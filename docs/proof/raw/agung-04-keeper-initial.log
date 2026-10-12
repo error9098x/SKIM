@@ -1,0 +1,3 @@
+[16:49:24] keeper    network=agung mode=SIMULATED (MockEventRegistry + derived rating) machine=76267944138051173729075493922440340318793428579787092462435695099982000366194
+[16:49:38] oracle    posted Provisioned (score 0) SIMULATED  https://agung-testnet.subscan.io/tx/0xb11c0ac3b9825836316f47513f7a1e1b1d9549f2061b3afe6c72fc697eabf99c
+[16:49:38] keeper    stopped
