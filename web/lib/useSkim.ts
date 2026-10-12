@@ -16,20 +16,29 @@ async function getJson<T>(url: string): Promise<T | null> {
 }
 
 export interface SkimHook {
+  /** Page state: live chain data once it has arrived, otherwise the demo replay. */
   state: SkimState;
+  /** Always the demo replay. Drives the hero explainer, which never switches to live data. */
+  demoState: SkimState;
   liveAvailable: boolean;
   liveError?: string;
   restartDemo: () => void;
   deployment: Deployment | null;
+  /** True while the first live read is in flight. */
+  connecting: boolean;
 }
+
+/** How long the mode bar says "connecting" before settling on the demo. */
+const BOOT_MS = 6000;
 
 export function useSkim(): SkimHook {
   const startRef = useRef<number>(Date.now());
-  const [state, setState] = useState<SkimState>(() => mockStateAt(0, Math.floor(Date.now() / 1000)));
+  const [demoState, setDemoState] = useState<SkimState>(() => mockStateAt(0, Math.floor(Date.now() / 1000)));
+  const [liveState, setLiveState] = useState<SkimState | null>(null);
   const [liveAvailable, setLiveAvailable] = useState(false);
   const [liveError, setLiveError] = useState<string | undefined>();
   const [deployment, setDeployment] = useState<Deployment | null>(null);
-  const liveOk = useRef(false);
+  const [connecting, setConnecting] = useState(true);
 
   const restartDemo = useCallback(() => {
     startRef.current = Date.now();
@@ -39,18 +48,20 @@ export function useSkim(): SkimHook {
   useEffect(() => {
     let stop = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const done = () => !stop && setConnecting(false);
+    const boot = setTimeout(done, BOOT_MS);
     (async () => {
       const params = new URLSearchParams(window.location.search);
-      if (params.has('demo')) return;
+      if (params.has('demo')) return done();
       const index = await getJson<{ networks: string[]; abis: boolean; preferred: string | null }>('/deployments/index.json');
-      if (!index || !index.networks.length) return;
+      if (!index || !index.networks.length) return done();
       const want = params.get('network') || process.env.NEXT_PUBLIC_NETWORK || index.preferred || '';
       const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
       const usable = index.networks.filter((n) => n !== 'local' || want === 'local' || isLocalHost);
-      if (!usable.length) return;
+      if (!usable.length) return done();
       const key = usable.includes(want) ? want : usable.includes('mainnet') && !want ? 'mainnet' : usable.includes('agung') ? 'agung' : usable[0];
       const dep = await getJson<Deployment>(`/deployments/${key}.json`);
-      if (!dep || !dep.contracts || !dep.machineId) return;
+      if (!dep || !dep.contracts || !dep.machineId) return done();
       const abis = index.abis ? await getJson<unknown>('/deployments/abis.json') : null;
       setDeployment(dep);
       setLiveAvailable(true);
@@ -59,9 +70,9 @@ export function useSkim(): SkimHook {
         try {
           const s = await reader.poll();
           if (stop) return;
-          liveOk.current = true;
           setLiveError(undefined);
-          setState(s);
+          setLiveState(s);
+          done();
         } catch (e) {
           if (stop) return;
           setLiveError((e as Error).message?.split('\n')[0] ?? 'RPC error');
@@ -72,20 +83,23 @@ export function useSkim(): SkimHook {
     })();
     return () => {
       stop = true;
+      clearTimeout(boot);
       if (timer) clearTimeout(timer);
     };
   }, []);
 
-  // Demo replay (runs until live data has arrived)
+  // Demo replay: always running, loops forever (the hero explainer depends on it).
   useEffect(() => {
     const id = setInterval(() => {
-      if (liveOk.current) return;
-      const elapsed = Date.now() - startRef.current;
-      if (elapsed > LOOP_MS) startRef.current = Date.now();
-      setState(mockStateAt(Math.min(elapsed, LOOP_MS), Math.floor(startRef.current / 1000)));
+      let elapsed = Date.now() - startRef.current;
+      if (elapsed > LOOP_MS) {
+        startRef.current = Date.now();
+        elapsed = 0;
+      }
+      setDemoState(mockStateAt(elapsed, Math.floor(startRef.current / 1000)));
     }, 200);
     return () => clearInterval(id);
   }, []);
 
-  return { state, liveAvailable, liveError, restartDemo, deployment };
+  return { state: liveState ?? demoState, demoState, liveAvailable, liveError, restartDemo, deployment, connecting };
 }

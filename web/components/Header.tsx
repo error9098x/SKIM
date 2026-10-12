@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { SkimState } from '@/lib/types';
 import { depositToVault, hasInjected } from '@/lib/wallet';
 import { txUrl } from '@/lib/format';
@@ -48,7 +48,7 @@ export function FundVault({ state }: { state: SkimState }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="whitespace-nowrap rounded-lg border border-rule px-3 py-1.5 text-[13px] font-medium text-ink-2 transition-colors duration-200 hover:border-ink-3 hover:text-ink"
+        className="press whitespace-nowrap rounded-lg border border-rule bg-paper-2/60 px-3 py-1.5 text-[13px] font-medium text-ink-2 transition-colors duration-200 hover:border-ink-3 hover:text-ink"
       >
         Vault liquidity
       </button>
@@ -90,17 +90,51 @@ export function FundVault({ state }: { state: SkimState }) {
   );
 }
 
+const NAV = [
+  ['why', 'Why SKIM'],
+  ['revenue', 'Revenue'],
+  ['terms', 'Terms'],
+  ['loan', 'Credit line'],
+  ['how', 'How it works'],
+] as const;
+
+/** Tracks which section sits under the sticky header. */
+function useActiveSection(): string {
+  const [active, setActive] = useState('');
+  useEffect(() => {
+    const els = NAV.map(([id]) => document.getElementById(id)).filter((e): e is HTMLElement => !!e);
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setActive(e.target.id);
+      },
+      { rootMargin: '-20% 0px -65% 0px' },
+    );
+    els.forEach((e) => io.observe(e));
+    return () => io.disconnect();
+  }, []);
+  return active;
+}
+
 export function Header({ state }: { state: SkimState }) {
+  const active = useActiveSection();
   return (
-    <header className="sticky top-0 z-40 border-b border-rule bg-paper/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-rule bg-paper/70 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex min-w-0 items-center gap-3 sm:gap-5">
-          <Logo />
-          <nav className="hidden items-center gap-5 text-[13px] text-ink-2 md:flex">
-            <a href="#revenue" className="hover:text-ink">Revenue</a>
-            <a href="#terms" className="hover:text-ink">Terms</a>
-            <a href="#loan" className="hover:text-ink">Credit line</a>
-            <a href="#how" className="hover:text-ink">How it works</a>
+        <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+          <a href="#" aria-label="SKIM home" className="press">
+            <Logo />
+          </a>
+          <nav aria-label="Sections" className="hidden items-center gap-0.5 rounded-full border border-rule bg-paper-2/60 p-1 text-[13px] md:flex">
+            {NAV.map(([id, label]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                aria-current={active === id ? 'true' : undefined}
+                className={`rounded-full px-3 py-1 transition-all duration-300 ${active === id ? 'bg-paper text-ink shadow-[0_0_0_1px_rgb(var(--rule))]' : 'text-ink-2 hover:text-ink'}`}
+              >
+                {label}
+              </a>
+            ))}
           </nav>
         </div>
         <FundVault state={state} />

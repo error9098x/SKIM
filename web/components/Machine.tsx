@@ -4,7 +4,8 @@ import type { SkimState } from '@/lib/types';
 import { gradeName, machineExplorerUrl } from '@/lib/config';
 import { addrUrl, fmtDate, short, timeAgo } from '@/lib/format';
 import { Chip, CopyText, ExtLink, GradeBadge } from './ui';
-import { isDemo, isRepaid, nftInVault, realHref } from './view';
+import { hasLoan, isDemo, isRepaid, nftInVault, realHref } from './view';
+import { ChargerArt } from './ChargerArt';
 
 type Mcr = { mcr?: string; mcr_score?: number; event_count?: number; revenue_event_count?: number; bond_status?: string; total_revenue?: number; revenue_trend?: string };
 
@@ -28,7 +29,10 @@ export function MachineCard({ state }: { state: SkimState }) {
           <div className="label">Machine</div>
           <div className="mt-1 text-lg font-semibold text-ink">EV charger · DC 50 kW</div>
         </div>
-        {!demo && <Chip tone="peaq">peaq ID</Chip>}
+        <div className="flex shrink-0 items-start gap-2">
+          {!demo && <Chip tone="peaq">peaq ID</Chip>}
+          <ChargerArt charging={hasLoan(state) && !isRepaid(state)} className="-my-3 h-20 w-20" />
+        </div>
       </div>
 
       <div className="mt-4 rounded-xl border border-rule bg-paper-2 p-3">

@@ -91,7 +91,7 @@ export function HowItWorks({ state }: { state: SkimState }) {
           </p>
         </div>
       </div>
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 self-start lg:sticky lg:top-20">
         <div className="card p-5 sm:p-6">
           <div className="flex items-center justify-between gap-2">
             <div className="label">Contracts · {mock ? 'demo placeholders' : state.network.name}</div>

@@ -23,11 +23,13 @@ const config: Config = {
         mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular'],
       },
       keyframes: {
+        'fade-in': { '0%': { opacity: '0', filter: 'blur(4px)' }, '100%': { opacity: '1', filter: 'blur(0)' } },
         rise: { '0%': { opacity: '0', transform: 'translateY(6px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
       },
       animation: {
         // transform/opacity only, never affects layout; 280ms inside the 180-320ms rule
         rise: 'rise .28s ease-out both',
+        'fade-in': 'fade-in .5s ease-out both',
       },
     },
   },

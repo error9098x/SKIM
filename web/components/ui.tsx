@@ -119,11 +119,14 @@ export function GradeBadge({ grade, size = 'md', sim = false }: { grade: string;
  * The single mode bar. Replaces the scattered SIMULATED/LIVE badges and the RPC-error strip.
  * Fixed height, one line, truncates instead of wrapping, so phase changes never shift layout.
  */
-export function ModeBar({ state, liveAvailable, liveError }: { state: SkimState; liveAvailable: boolean; liveError?: string }) {
+export function ModeBar({ state, liveAvailable, liveError, connecting = false }: { state: SkimState; liveAvailable: boolean; liveError?: string; connecting?: boolean }) {
   const demo = isDemo(state);
   let text: string;
   let short: string | undefined;
-  if (demo) {
+  if (connecting) {
+    text = 'Connecting to peaq · reading the latest loan';
+    short = 'Connecting to peaq…';
+  } else if (demo) {
     const lead = liveAvailable ? (liveError ? 'Chain unreachable, retrying · showing demo replay' : 'Connecting to chain · showing demo replay') : 'Simulated · demo replay of one loan cycle';
     text = state.demoPhase ? `${lead} · ${state.demoPhase}` : lead;
     // 390px: one short line so the phase is never ellipsised ("Simulated · demo · Repaying · session 4").

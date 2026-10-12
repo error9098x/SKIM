@@ -1,27 +1,34 @@
 'use client';
 import { useSkim } from '@/lib/useSkim';
-import { Header, Logo } from '@/components/Header';
+import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { MachineCard } from '@/components/Machine';
 import { LoanPanel, TermsCurve } from '@/components/Loan';
 import { RevenueFeed } from '@/components/Revenue';
 import { Toasts } from '@/components/Toasts';
+import { CtaBand, Footer } from '@/components/Footer';
+import { BentoGrid } from '@/components/Bento';
 import { HowItWorks } from '@/components/HowItWorks';
 import { ModeBar, SectionHead, SimTag } from '@/components/ui';
 import { isDemo } from '@/components/view';
 
 export default function Page() {
-  const { state, liveAvailable, liveError, restartDemo } = useSkim();
+  const { state, demoState, liveAvailable, liveError, restartDemo, connecting } = useSkim();
   const demo = isDemo(state);
 
   return (
     <>
       <Header state={state} />
       {/* The single mode indicator. Always rendered, fixed height, in both modes. */}
-      <ModeBar state={state} liveAvailable={liveAvailable} liveError={liveError} />
+      <ModeBar state={state} liveAvailable={liveAvailable} liveError={liveError} connecting={connecting} />
 
       <main>
-        <Hero state={state} onReplay={restartDemo} />
+        <Hero state={state} demoState={demoState} onReplay={restartDemo} />
+
+        <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+          <SectionHead id="why" title="Credit built for machines" />
+          <BentoGrid />
+        </section>
 
         {/* Order: hero instrument → revenue feed → terms staircase → credit line report → how it works */}
         <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
@@ -71,12 +78,8 @@ export default function Page() {
         </section>
       </main>
 
-      <footer className="mt-10 border-t border-rule">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-8 text-[12px] text-ink-2 sm:flex-row sm:items-center sm:px-6">
-          <Logo />
-          <p>Built for the peaq Machine Economy hackathon. Testnet ratings are simulated; mainnet ratings come from the peaq MCR.</p>
-        </div>
-      </footer>
+      <CtaBand />
+      <Footer />
       <Toasts state={state} />
     </>
   );

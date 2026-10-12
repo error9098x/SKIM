@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Activity, Session, SkimState } from '@/lib/types';
 import { fmtToken, ratio, timeAgo } from '@/lib/format';
 import { HashRef } from './ui';
-import { activityDetail, activityLabel, isDemo, sessionSplits, unitLabel, type Split } from './view';
+import { activityDetail, activityLabel, isDemo, isRepaid, sessionSplits, unitLabel, type Split } from './view';
 
 function useNow() {
   const [now, setNow] = useState(() => Date.now() / 1000);
@@ -12,6 +12,30 @@ function useNow() {
     return () => clearInterval(id);
   }, []);
   return now;
+}
+
+/** Fills the fixed feed box below the rows: a live "listening" row over skeleton rows that fade out. */
+function FeedTail({ repaid }: { repaid: boolean }) {
+  return (
+    <div aria-hidden={repaid} className="relative">
+      <div className="flex h-[60px] items-center gap-3 px-4 text-[13px] text-ink-2 sm:px-5">
+        <span className="relative flex h-2 w-2">
+          {!repaid && <span className="ring absolute inset-0 rounded-full bg-repaid" />}
+          <span className={`relative h-2 w-2 rounded-full ${repaid ? 'bg-ink-3' : 'bg-repaid'}`} />
+        </span>
+        {repaid ? 'Loan closed · no more skims routed' : 'Listening for the next charging session…'}
+      </div>
+      <div className="space-y-px [mask-image:linear-gradient(to_bottom,#000,transparent)]">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="flex h-[60px] items-center gap-4 px-4 sm:px-5">
+            <span className="h-2 w-12 rounded-full bg-paper-2" />
+            <span className="h-2 rounded-full bg-paper-2" style={{ width: `${38 - i * 5}%` }} />
+            <span className="ml-auto hidden h-5 w-[120px] rounded-md bg-paper-2 md:block" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // Fixed box height: the feed never grows as rows arrive (zero layout shift).
@@ -202,7 +226,8 @@ export function RevenueFeed({ state }: { state: SkimState }) {
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-rule">
+          <>
+          <ul className="divide-y divide-rule border-b border-rule">
             {rows.map((r) => {
               if (r.kind === 'session')
                 return <SessionRow key={r.key} state={state} row={r} n={sessionNo.get(r.s.key) ?? 0} now={now} unit={unit} fresh={r.s.key === newest} />;
@@ -228,6 +253,8 @@ export function RevenueFeed({ state }: { state: SkimState }) {
               return <ActionRow key={r.key} state={state} glyph={ICON[a.kind] ?? '•'} text={activityLabel(state, a)} detail={activityDetail(state, a)} tone={tone} hash={a.txHash} ts={a.timestamp} now={now} />;
             })}
           </ul>
+          <FeedTail repaid={isRepaid(state)} />
+          </>
         )}
       </div>
     </div>

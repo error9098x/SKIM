@@ -1,10 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { SkimState } from '@/lib/types';
 import { gradeName } from '@/lib/config';
 import { fmtToken, pct, ratio, shortId, addrUrl } from '@/lib/format';
+import { formatEther } from 'viem';
 import { GradeBadge } from './ui';
 import { FlowStrip } from './Flow';
+import { DottedGlow } from './DottedGlow';
 import { hasLoan, isDemo, isRepaid, loanFeeBps, loanGrade, nextLine, nftInVault, payoffSegments, realHref, unitLabel } from './view';
 
 export function loopStep(s: SkimState): number {
@@ -76,6 +78,38 @@ function useShownSegs(n: number): number {
   return Math.min(shown, n);
 }
 
+/**
+ * Counts a number from its previous value to the new one (ease-out, ~650ms) so amounts roll
+ * instead of snapping. Reduced motion, or a reset to a smaller value, jumps straight there.
+ */
+function useTween(target: number, ms = 650): number {
+  const [v, setV] = useState(target);
+  const from = useRef(target);
+  useEffect(() => {
+    const start = from.current;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || target < start || start === target) {
+      from.current = target;
+      setV(target);
+      return;
+    }
+    let raf = 0;
+    let t0 = -1;
+    const step = (now: number) => {
+      // Clock starts on the first frame (rAF timestamps can predate performance.now()), and k stays in [0, 1].
+      if (t0 < 0) t0 = now;
+      const k = Math.min(1, Math.max(0, (now - t0) / ms));
+      const val = start + (target - start) * (1 - Math.pow(1 - k, 3));
+      from.current = val;
+      setV(val);
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return v;
+}
+
 /** Payoff bar: one segment per session, each as wide as what that session repaid (capped). Σ segments = repaid. */
 function PayoffBar({ state, repaid, shownN, shownRepaid }: { state: SkimState; repaid: boolean; shownN: number; shownRepaid: bigint }) {
   const loan = hasLoan(state) ? state.loan : null;
@@ -144,7 +178,12 @@ function FacilityCard({ state }: { state: SkimState }) {
   // RevenueRouted logs, so while the loan is active the number follows the drawn segments (capped at
   // loan.repaid) and never leads the bar. Once repaid it is the contract value.
   const shownRepaid = loan ? (repaid ? loan.repaid : segSum > loan.repaid ? loan.repaid : segSum) : 0n;
-  const big = loan ? fmtToken(shownRepaid, 2) : fmtToken(principal, 2);
+  const bigTarget = Number(formatEther(loan ? shownRepaid : principal ?? 0n));
+  const bigTween = useTween(bigTarget);
+  // Snap to the exact contract-formatted string once the roll lands, so the final digits never disagree with fmtToken.
+  const big = Math.abs(bigTween - bigTarget) < 1e-9 ? (loan ? fmtToken(shownRepaid, 2) : fmtToken(principal, 2)) : bigTween.toFixed(2);
+  // Offer ↔ loan is a change of meaning, not of amount: fade the block in fresh instead of counting 1.00 down to 0.00.
+  const mode = loan ? 'loan' : 'offer';
 
   let statusLine: { text: string; tone: string };
   if (repaid) statusLine = { text: 'Repaid ✓ · NFT returned to operator', tone: 'text-repaid-text' };
@@ -188,9 +227,9 @@ function FacilityCard({ state }: { state: SkimState }) {
       </div>
 
       <div className="mt-4 min-w-0 sm:mt-5">
-        <div className="label">{loan ? 'Repaid of owed' : 'Available advance'}</div>
+        <div key={mode} className="label animate-rise">{loan ? 'Repaid of owed' : 'Available advance'}</div>
         <div id="hero-number" className="num mt-1 flex h-[48px] items-baseline whitespace-nowrap leading-none sm:h-[66px]">
-          <span key={big} className="animate-rise text-[44px] font-medium tracking-[-0.02em] text-ink sm:text-[64px]">
+          <span key={mode} className="animate-rise text-[44px] font-medium tracking-[-0.02em] text-ink sm:text-[64px]">
             {big}
           </span>
           <span className="ml-2 truncate text-[14px] text-ink-2 sm:text-lg">{loan ? `/ ${fmtToken(loan.owed, 2)} ${unit}` : unit}</span>
@@ -236,51 +275,64 @@ function FacilityCard({ state }: { state: SkimState }) {
   );
 }
 
-export function Hero({ state, onReplay }: { state: SkimState; onReplay: () => void }) {
+/**
+ * The hero card is an explainer: it always plays the demo replay of one full loan cycle (offer → advance →
+ * repaid → upgrade), whatever the chain says. Live chain data lives in the sections below.
+ */
+export function Hero({ state, demoState, onReplay }: { state: SkimState; demoState: SkimState; onReplay: () => void }) {
   const explorer = realHref(state, state.contracts.vault ? addrUrl(state.network.explorer, state.contracts.vault) : state.network.explorer);
-  const demo = isDemo(state);
-  // Fixed CTA height (border-box): demo <button> and live <a>s (one bordered) must be equally tall, so page height is mode-independent.
-  const cta = 'inline-flex h-10 items-center rounded-xl bg-ink px-4 text-sm font-semibold text-paper transition-opacity duration-200 hover:opacity-90 sm:h-11 sm:px-5';
+  const live = !isDemo(state);
+  // Fixed CTA height (border-box): the <button> and the bordered explorer <a> must be equally tall.
+  const cta = 'press inline-flex h-10 items-center rounded-xl bg-ink px-4 text-sm font-semibold text-paper shadow-[0_0_30px_-8px_rgb(var(--ink)/0.5)] hover:opacity-90 sm:h-11 sm:px-5';
   return (
-    <section className="relative">
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-5 sm:px-6 sm:pt-10 lg:pb-14">
+    <section className="relative overflow-hidden">
+      <div aria-hidden className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_72%_45%,#000_10%,transparent_70%)]">
+        <DottedGlow />
+      </div>
+      {/* Soft halo behind the instrument card */}
+      <div aria-hidden className="pointer-events-none absolute right-[8%] top-[18%] hidden h-[420px] w-[520px] rounded-full bg-[radial-gradient(closest-side,rgb(var(--skim)/0.10),rgb(var(--peaq)/0.06)_55%,transparent)] blur-2xl lg:block" />
+      <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-5 sm:px-6 sm:pt-10 lg:pb-14">
         <div className="grid items-center gap-5 lg:grid-cols-[1fr_1.05fr] lg:gap-12">
           <div className="min-w-0">
-            <p className="hidden text-[13px] text-ink-2 sm:block">Revenue-based financing on peaq · Machine Economy</p>
-            <h1 className="text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] text-ink sm:mt-4 sm:text-6xl lg:text-[60px]">
+            <p style={{ animationDelay: '0ms' }} className="animate-rise hidden text-[13px] text-ink-2 sm:block">Revenue-based financing on peaq · Machine Economy</p>
+            <h1 style={{ animationDelay: '80ms' }} className="animate-rise text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] text-ink sm:mt-4 sm:text-6xl lg:text-[60px]">
               Machines earn.
               <br />
               <span className="text-ink-2">Now they can borrow.</span>
             </h1>
             <p className="mt-2 text-[14px] leading-snug text-ink-2 sm:hidden">An advance against the Machine NFT, repaid by skimming every payment it earns.</p>
-            <p className="mt-6 hidden max-w-xl text-lg leading-relaxed text-ink-2 sm:block">
+            <p style={{ animationDelay: '160ms' }} className="animate-rise mt-6 hidden max-w-xl text-lg leading-relaxed text-ink-2 sm:block">
               SKIM advances working capital to a machine against its Machine NFT, priced by its Machine Credit Rating, and repays itself by skimming a share of every on-chain payment the machine earns.
             </p>
-            <div className="mt-3 flex flex-wrap gap-3 sm:mt-8">
-              {demo ? (
-                <button
-                  type="button"
-                  className={cta}
-                  onClick={() => {
-                    onReplay();
-                    document.getElementById('loan-instrument')?.scrollIntoView({ block: 'nearest' });
-                  }}
-                >
-                  Watch a loan repay itself
-                </button>
-              ) : (
-                <a href="?demo" className={cta}>
-                  Watch a loan repay itself
-                </a>
-              )}
+            <div style={{ animationDelay: '240ms' }} className="animate-rise mt-3 flex flex-wrap gap-3 sm:mt-8">
+              <button
+                type="button"
+                className={cta}
+                onClick={() => {
+                  onReplay();
+                  document.getElementById('loan-instrument')?.scrollIntoView({ block: 'nearest' });
+                }}
+              >
+                Watch a loan repay itself
+              </button>
               {explorer && (
-                <a href={explorer} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-xl border border-rule px-4 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink-3 sm:h-11 sm:px-5">
+                <a href={explorer} target="_blank" rel="noreferrer" className="press inline-flex h-10 items-center rounded-xl border border-rule bg-paper-2/60 px-4 text-sm font-semibold text-ink hover:border-ink-3 sm:h-11 sm:px-5">
                   Open explorer ↗
                 </a>
               )}
             </div>
           </div>
-          <FacilityCard state={state} />
+          <div style={{ animationDelay: '320ms' }} className="animate-rise min-w-0">
+            <FacilityCard state={demoState} />
+            <div className="mt-3 flex items-center justify-between gap-3 px-1 text-[12px] text-ink-3">
+              <span>Simulated replay · one loan cycle, start to finish</span>
+              {live && (
+                <a href="#loan" className="link shrink-0">
+                  See the real loan on chain ↓
+                </a>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
