@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * SKIM semantic tokens (round3-designer.md + frontend's three paper-2 fixes).
+ * Values are "R G B" triples so Tailwind can apply <alpha-value>.
+ *
+ *   :root              light paper page (ship target)
+ *   .inst              the one dark instrument card (scoped re-definition of the same names)
+ *   html.theme-dark    hard dark fallback (23:30 gate). One class on <html>, no class renames.
+ *
+ * scripts/contrast.mjs parses these blocks and fails the build if a text pair drops below 4.5:1.
+ */
+:root {
+  color-scheme: light;
+  --paper: 247 247 245;      /* #F7F7F5 */
+  --paper-2: 239 239 236;    /* #EFEFEC */
+  --rule: 222 221 216;       /* #DEDDD8 hairline (decorative) */
+  --ink: 17 17 20;           /* #111114 */
+  --ink-2: 74 74 82;         /* #4A4A52 body, labels */
+  --ink-3: 99 98 105;        /* #636269 muted (darkened for paper-2) */
+  --skim: 238 83 24;         /* #EE5318 fill only */
+  --skim-text: 185 61 14;    /* #B93D0E */
+  --repaid: 18 161 94;       /* #12A15E fill only */
+  --repaid-text: 10 117 67;  /* #0A7543 (darkened for paper-2) */
+  --peaq: 107 75 255;        /* #6B4BFF fill / seal */
+  --peaq-text: 90 60 224;    /* #5A3CE0 (darkened for paper-2) */
+  --red: 180 35 24;          /* #B42318 */
+  --hatch: 230 230 226;      /* #E6E6E2 sim stripe */
+}
+
+.inst {
+  color-scheme: dark;
+  --paper: 14 15 18;         /* inst-bg #0E0F12 */
+  --paper-2: 23 24 29;       /* inst-surface #17181D */
+  --rule: 39 41 50;          /* inst-line #272932 */
+  --ink: 247 247 245;        /* inst-text #F7F7F5 */
+  --ink-2: 154 155 165;      /* inst-text-2 #9A9BA5 */
+  --ink-3: 154 155 165;
+  --skim: 255 91 31;         /* #FF5B1F */
+  --skim-text: 255 106 51;   /* #FF6A33 */
+  --repaid: 61 220 151;      /* #3DDC97 */
+  --repaid-text: 61 220 151;
+  --peaq: 162 143 255;       /* #A28FFF */
+  --peaq-text: 162 143 255;
+  --red: 249 112 102;        /* #F97066 */
+  --hatch: 42 44 51;         /* #2A2C33 */
+  background-color: rgb(var(--paper));
+  color: rgb(var(--ink));
+}
+
+/* Hard dark fallback: add class="theme-dark" to <html> (app/layout.tsx THEME constant). */
+html.theme-dark {
+  color-scheme: dark;
+  --paper: 14 15 18;         /* #0E0F12 */
+  --paper-2: 22 23 28;       /* #16171C */
+  --rule: 39 41 50;          /* #272932 */
+  --ink: 242 242 240;        /* #F2F2F0 */
+  --ink-2: 180 181 190;      /* #B4B5BE */
+  --ink-3: 154 155 165;      /* #9A9BA5 */
+  --skim: 255 91 31;
+  --skim-text: 255 106 51;
+  --repaid: 61 220 151;
+  --repaid-text: 61 220 151;
+  --peaq: 162 143 255;
+  --peaq-text: 162 143 255;
+  --red: 249 112 102;
+  --hatch: 42 44 51;
+}
+html.theme-dark .inst {
+  --paper: 29 31 38;         /* raised #1D1F26 */
+  --paper-2: 37 39 49;       /* #252731 */
+  --rule: 51 53 63;          /* #33353F */
+  --ink: 242 242 240;
+  --ink-2: 180 181 190;
+  --ink-3: 154 155 165;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.card { @apply min-w-0 rounded-2xl border border-rule bg-paper; }
+/* sentence-case 12px labels, no uppercase tracking */
+.label { @apply text-[12px] font-medium text-ink-2; }
+.num { font-variant-numeric: tabular-nums; @apply font-mono; }
+.link { @apply text-peaq-text underline-offset-4 hover:underline; }
+
+/* SIMULATED: achromatic hatch (amber removed from the palette) */
+.sim-hatch {
+  background-image: repeating-linear-gradient(135deg, rgb(var(--hatch)) 0 4px, rgb(var(--paper-2)) 4px 8px);
+}
+.sim-hatch-paper {
+  background-image: repeating-linear-gradient(135deg, rgb(var(--hatch)) 0 4px, rgb(var(--paper)) 4px 8px);
+}
+
+
+/*
+ * Money motion (fires only when a value changes; elements are keyed by the value).
+ * 260ms per step, transform/opacity only, inside fixed boxes: zero layout shift.
+ * Sequence per session: Customer→Router (0ms), Router→Vault/Machine (260ms), bar segment (520ms).
+ */
+@keyframes flow-travel-x {
+  0% { transform: translateX(-100%); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateX(0); opacity: 0; }
+}
+@keyframes flow-travel-y {
+  0% { transform: translateY(-100%); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+@keyframes flow-flash { 0% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes seg-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.flow-travel-x { animation: flow-travel-x 260ms ease-in-out both; }
+.flow-travel-y { animation: flow-travel-y 260ms ease-in-out both; }
+.flow-flash { opacity: 0; animation: flow-flash 300ms ease-out 520ms both; }
+.seg-in { transform-origin: left center; animation: seg-in 260ms ease-out 520ms both; }
+
+/* Staircase marker steps on rating change. */
+.step-marker { transition: transform 320ms cubic-bezier(.2,.7,.2,1); }
+
+::selection { background: rgb(var(--peaq) / 0.25); }
+
+/* Reduced motion: values jump, nothing travels. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
