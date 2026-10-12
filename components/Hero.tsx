@@ -157,25 +157,28 @@ function FacilityCard({ state }: { state: SkimState }) {
 
   return (
     <div id="loan-instrument" className="inst relative min-w-0 overflow-hidden rounded-[22px] border border-rule p-4 sm:p-6">
-      {/* Row 1: what this card is + loan status. Row 2: machine DID + its rating (source labelled at every width). */}
-      <div className="flex h-6 items-center justify-between gap-3">
-        <div className="label min-w-0 truncate">
-          {loan ? (
-            <>
-              Advance · {g}
-              <span className="hidden sm:inline"> at origination</span>
-            </>
-          ) : (
-            `Offer · ${g}`
-          )}
+      {/* One header row (height unchanged): what this card is + DID | rating source + seal + status.
+          390px: the seal already names the grade, so the left column carries "Advance" + the rating source instead. */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="label truncate">
+            {loan ? (
+              <>
+                Advance<span className="hidden sm:inline"> · {g} at origination</span>
+              </>
+            ) : (
+              `Offer · ${g}`
+            )}
+          </div>
+          <div className="mt-0.5 truncate font-mono text-[12px] text-ink-2">
+            <span className="sm:hidden">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
+            <span className="hidden sm:inline">did:peaq:{shortId(state.machineId)}</span>
+          </div>
         </div>
-        <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[12px] font-medium transition-colors duration-300 ${statusTone}`}>{status}</span>
-      </div>
-      <div className="mt-1.5 flex h-9 items-center justify-between gap-3">
-        <div className="min-w-0 truncate font-mono text-[12px] text-ink-2">did:peaq:{shortId(state.machineId)}</div>
         <div className="flex shrink-0 items-center gap-2" title={upgradedTo ? 'Grade at origination → current Machine Credit Rating' : undefined}>
-          <span className="text-[12px] text-ink-2">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
+          <span className="hidden text-[12px] text-ink-2 sm:inline">{state.simulatedRating ? 'MCR · simulated' : 'MCR'}</span>
           <GradeBadge grade={upgradedTo ? `${g} → ${upgradedTo}` : g} />
+          <span className={`rounded-md border px-2 py-0.5 text-[12px] font-medium transition-colors duration-300 ${statusTone}`}>{status}</span>
         </div>
       </div>
 
@@ -215,7 +218,15 @@ function FacilityCard({ state }: { state: SkimState }) {
       <div className="mt-3 h-5 truncate text-[12px] leading-5">
         <span className={`transition-colors duration-300 ${statusLine.tone}`}>{statusLine.text}</span>
       </div>
-      <div className="h-5 truncate text-[12px] leading-5 text-ink-2">{nextText}</div>
+      <div className="h-5 truncate text-[12px] leading-5 text-ink-2">
+        {next ? (
+          <span className="font-medium text-peaq-text">
+            Next line unlocked → <span className="num">{next}</span>
+          </span>
+        ) : (
+          nextText
+        )}
+      </div>
     </div>
   );
 }
