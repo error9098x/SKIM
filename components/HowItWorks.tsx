@@ -2,33 +2,40 @@
 import type { SkimState } from '@/lib/types';
 import { LINKS } from '@/lib/config';
 import { addrUrl } from '@/lib/format';
-import { CopyText, ExtLink, SimBadge } from './ui';
+import { CopyText, ExtLink } from './ui';
+import { isDemo, isPlaceholderLink, unitLabel } from './view';
 
-type N = { x: number; y: number; w: number; t: string; s: string; tone?: 'peaq' | 'mint' | 'base' };
+type Tone = 'peaq' | 'repaid' | 'skim' | 'base';
+type N = { x: number; y: number; w: number; t: string; s: string; tone?: Tone };
+
+const NODE_STROKE: Record<Tone, string> = { peaq: 'stroke-peaq', repaid: 'stroke-repaid', skim: 'stroke-skim', base: 'stroke-ink-3' };
+const NODE_FILL: Record<Tone, string> = { peaq: 'fill-peaq/10', repaid: 'fill-repaid/10', skim: 'fill-skim/10', base: 'fill-paper-2' };
 
 function Node({ n }: { n: N }) {
-  const stroke = n.tone === 'peaq' ? '#8B6CFF' : n.tone === 'mint' ? '#4BE3B0' : 'rgba(255,255,255,0.16)';
-  const fill = n.tone === 'peaq' ? 'rgba(139,108,255,0.12)' : n.tone === 'mint' ? 'rgba(75,227,176,0.08)' : 'rgba(255,255,255,0.03)';
+  const tone = n.tone ?? 'base';
   return (
     <g>
-      <rect x={n.x} y={n.y} width={n.w} height={58} rx={12} fill={fill} stroke={stroke} strokeWidth={1.2} />
-      <text x={n.x + n.w / 2} y={n.y + 25} textAnchor="middle" fill="#F4F3FA" fontSize={14} fontWeight={600} fontFamily="var(--font-sans)">
+      <rect x={n.x} y={n.y} width={n.w} height={58} rx={12} className={`${NODE_FILL[tone]} ${NODE_STROKE[tone]}`} strokeWidth={1.2} />
+      <text x={n.x + n.w / 2} y={n.y + 25} textAnchor="middle" className="fill-ink" fontSize={14} fontWeight={600} fontFamily="var(--font-sans)">
         {n.t}
       </text>
-      <text x={n.x + n.w / 2} y={n.y + 43} textAnchor="middle" fill="#8E8AA8" fontSize={11} fontFamily="var(--font-mono)">
+      <text x={n.x + n.w / 2} y={n.y + 43} textAnchor="middle" className="fill-ink-2" fontSize={12} fontFamily="var(--font-mono)">
         {n.s}
       </text>
     </g>
   );
 }
 
-function Arrow({ d, label, lx, ly, color = '#8B6CFF', dashed = false }: { d: string; label?: string; lx?: number; ly?: number; color?: string; dashed?: boolean }) {
+type ArrowTone = 'ink' | 'skim' | 'repaid';
+const ARROW_STROKE: Record<ArrowTone, string> = { ink: 'stroke-ink-3', skim: 'stroke-skim', repaid: 'stroke-repaid' };
+
+function Arrow({ d, label, lx, ly, tone = 'ink', dashed = false }: { d: string; label?: string; lx?: number; ly?: number; tone?: ArrowTone; dashed?: boolean }) {
   return (
     <g>
-      <path d={d} fill="none" stroke={color} strokeOpacity={0.35} strokeWidth={1.5} />
-      <path d={d} fill="none" stroke={color} strokeWidth={1.5} className={dashed ? '' : 'flow-line'} strokeDasharray={dashed ? '3 5' : undefined} markerEnd="url(#arrow)" />
+      {/* static dashes: no ambient motion */}
+      <path d={d} fill="none" className={ARROW_STROKE[tone]} strokeWidth={1.5} strokeDasharray={dashed ? '3 5' : undefined} markerEnd={`url(#arrow-${tone})`} />
       {label && (
-        <text x={lx} y={ly} textAnchor="middle" fill="#B5B2CA" fontSize={11} fontFamily="var(--font-mono)">
+        <text x={lx} y={ly} textAnchor="middle" className="fill-ink-2" fontSize={12} fontFamily="var(--font-mono)">
           {label}
         </text>
       )}
@@ -36,37 +43,39 @@ function Arrow({ d, label, lx, ly, color = '#8B6CFF', dashed = false }: { d: str
   );
 }
 
-function Diagram() {
+function Diagram({ unit }: { unit: string }) {
   // money lane (y=40) and data lane (y=230)
-  const charger: N = { x: 10, y: 40, w: 150, t: 'EV charger', s: 'driver pays', tone: 'base' };
-  const router: N = { x: 240, y: 40, w: 170, t: 'RevenueRouter', s: 'pay(machineId)', tone: 'peaq' };
-  const vault: N = { x: 520, y: 0, w: 170, t: 'SkimVault', s: 'repay() · escrow NFT', tone: 'peaq' };
-  const machine: N = { x: 520, y: 86, w: 170, t: 'Machine wallet', s: 'keeps the rest', tone: 'mint' };
-  const owner: N = { x: 800, y: 0, w: 170, t: 'NFT returned', s: 'LoanClosed', tone: 'mint' };
+  const charger: N = { x: 10, y: 40, w: 150, t: 'EV charger', s: 'driver pays' };
+  const router: N = { x: 240, y: 40, w: 170, t: 'RevenueRouter', s: 'pay(machineId)' };
+  const vault: N = { x: 520, y: 0, w: 170, t: 'SkimVault', s: 'repay() · escrow NFT', tone: 'skim' };
+  const machine: N = { x: 520, y: 86, w: 170, t: 'Machine wallet', s: 'keeps the rest' };
+  const owner: N = { x: 800, y: 0, w: 170, t: 'NFT returned', s: 'LoanClosed', tone: 'repaid' };
 
-  const keeper: N = { x: 10, y: 236, w: 150, t: 'Keeper', s: 'watches RevenueRouted', tone: 'base' };
-  const registry: N = { x: 220, y: 236, w: 170, t: 'EventRegistry', s: 'revenue · trust 1', tone: 'base' };
-  const mcr: N = { x: 430, y: 236, w: 150, t: 'MCR', s: 'mcr.peaq.xyz', tone: 'base' };
+  const keeper: N = { x: 10, y: 236, w: 150, t: 'Keeper', s: 'watches RevenueRouted' };
+  const registry: N = { x: 220, y: 236, w: 170, t: 'EventRegistry', s: 'revenue · trust 1' };
+  const mcr: N = { x: 430, y: 236, w: 150, t: 'MCR', s: 'mcr.peaq.xyz', tone: 'peaq' };
   const oracle: N = { x: 620, y: 236, w: 150, t: 'MCROracle', s: 'post(score, grade)', tone: 'peaq' };
-  const terms: N = { x: 810, y: 236, w: 160, t: 'Loan terms', s: 'quote(machineId)', tone: 'peaq' };
+  const terms: N = { x: 810, y: 236, w: 160, t: 'Loan terms', s: 'quote(machineId)' };
 
   return (
     <svg viewBox="0 0 980 310" className="h-auto w-full" role="img" aria-label="SKIM architecture diagram">
       <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" fill="#A48BFF" />
-        </marker>
+        {(['ink', 'skim', 'repaid'] as const).map((t) => (
+          <marker key={t} id={`arrow-${t}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" className={t === 'ink' ? 'fill-ink-3' : t === 'skim' ? 'fill-skim' : 'fill-repaid'} />
+          </marker>
+        ))}
       </defs>
-      <text x={10} y={20} fill="#6D6987" fontSize={10} letterSpacing={2} fontFamily="var(--font-sans)">
-        MONEY · NATIVE PEAQ
+      <text x={10} y={20} className="fill-ink-2" fontSize={12} fontFamily="var(--font-sans)">
+        Money · native {unit}
       </text>
-      <text x={10} y={216} fill="#6D6987" fontSize={10} letterSpacing={2} fontFamily="var(--font-sans)">
-        DATA · CREDIT SIGNAL
+      <text x={10} y={216} className="fill-ink-2" fontSize={12} fontFamily="var(--font-sans)">
+        Data · credit signal
       </text>
       <Arrow d="M160 69 H236" label="session" lx={198} ly={60} />
-      <Arrow d="M410 60 C460 60 470 29 516 29" label="skim %" lx={462} ly={36} />
-      <Arrow d="M410 78 C460 78 470 115 516 115" label="rest" lx={462} ly={112} color="#4BE3B0" />
-      <Arrow d="M690 29 H796" label="paid off" lx={743} ly={20} color="#4BE3B0" />
+      <Arrow d="M410 60 C460 60 470 29 516 29" label="skim %" lx={462} ly={36} tone="skim" />
+      <Arrow d="M410 78 C460 78 470 115 516 115" label="rest" lx={462} ly={112} />
+      <Arrow d="M690 29 H796" label="paid off" lx={743} ly={20} tone="repaid" />
       {/* router -> keeper (event) */}
       <Arrow d="M300 98 C300 170 85 170 85 232" label="RevenueRouted" lx={190} ly={166} dashed />
       <Arrow d="M160 265 H216" />
@@ -93,6 +102,7 @@ const MOBILE_STEPS = [
 
 export function HowItWorks({ state }: { state: SkimState }) {
   const c = state.contracts;
+  const unit = unitLabel(state);
   const rows: [string, string | undefined][] = [
     ['SkimVault', c.vault],
     ['RevenueRouter', c.router],
@@ -100,76 +110,83 @@ export function HowItWorks({ state }: { state: SkimState }) {
     ['Machine NFT', c.machineNft],
     [state.network.isMainnet ? 'EventRegistry 2.0' : 'MockEventRegistry', c.eventRegistry],
   ];
-  const mock = state.source === 'mock';
+  const mock = isDemo(state);
+  // '#github' style fallbacks are placeholders: never rendered.
+  const links = (
+    [
+      ['GitHub', LINKS.github],
+      ['README', LINKS.readme],
+      ['Demo video', LINKS.video],
+    ] as const
+  ).filter(([, href]) => !isPlaceholderLink(href));
   return (
     <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
       <div className="card p-5 sm:p-6">
         <div className="hidden md:block">
-          <Diagram />
+          <Diagram unit={unit} />
         </div>
         <ol className="space-y-3 md:hidden">
           {MOBILE_STEPS.map(([t, d], i) => (
             <li key={t} className="flex gap-3">
-              <span className="num mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-peaq-400/40 text-[11px] text-peaq-300">{i + 1}</span>
+              <span className="num mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-rule text-[12px] text-ink-2">{i + 1}</span>
               <div>
-                <div className="text-sm font-medium text-fog-100">{t}</div>
-                <div className="text-xs leading-relaxed text-fog-400">{d}</div>
+                <div className="text-sm font-medium text-ink">{t}</div>
+                <div className="text-[12px] leading-relaxed text-ink-2">{d}</div>
               </div>
             </li>
           ))}
         </ol>
-        <div className="mt-5 grid gap-3 border-t border-white/[0.06] pt-5 text-sm text-fog-300 sm:grid-cols-3">
+        <div className="mt-5 grid gap-3 border-t border-rule pt-5 text-sm text-ink-2 sm:grid-cols-3">
           <p>
-            <span className="font-medium text-fog-100">Collateral is identity.</span> The Machine NFT is escrowed, so a defaulted loan leaves the vault holding the machine’s on-chain identity.
+            <span className="font-medium text-ink">Collateral is identity.</span> The Machine NFT is escrowed, so a defaulted loan leaves the vault holding the machine’s on-chain identity.
           </p>
           <p>
-            <span className="font-medium text-fog-100">Repayment is automatic.</span> No invoices or schedules: the router repays a fixed share of whatever the machine earns.
+            <span className="font-medium text-ink">Repayment is automatic.</span> No invoices or schedules: the router repays a fixed share of whatever the machine earns.
           </p>
           <p>
-            <span className="font-medium text-fog-100">Credit compounds.</span> Verified revenue raises the MCR, and a better grade unlocks a bigger, cheaper next line.
+            <span className="font-medium text-ink">Credit compounds.</span> Verified revenue raises the MCR, and a better grade unlocks a bigger, cheaper next line.
           </p>
         </div>
       </div>
       <div className="flex flex-col gap-5">
         <div className="card p-5 sm:p-6">
           <div className="flex items-center justify-between gap-2">
-            <div className="label">Contracts · {state.network.name}</div>
-            {mock && <SimBadge title="Placeholder addresses from the demo replay" />}
+            <div className="label">Contracts · {mock ? 'demo placeholders' : state.network.name}</div>
           </div>
           <ul className="mt-3 space-y-2.5">
             {rows.map(([name, a]) => (
-              <li key={name} className="flex items-center justify-between gap-3 text-sm">
-                <span className="shrink-0 text-fog-300">{name}</span>
+              <li key={name} className="flex h-6 items-center justify-between gap-3 text-sm">
+                <span className="shrink-0 text-ink-2">{name}</span>
                 {a ? (
                   mock ? (
-                    <span className="truncate font-mono text-xs text-fog-500">{a.slice(0, 8)}…{a.slice(-6)}</span>
+                    <span className="truncate font-mono text-[12px] text-ink-3">{a.slice(0, 8)}…{a.slice(-6)}</span>
                   ) : (
                     <span className="flex min-w-0 items-center gap-2">
-                      <CopyText text={a} display={`${a.slice(0, 8)}…${a.slice(-6)}`} className="text-xs" />
-                      <ExtLink href={addrUrl(state.network.explorer, a)} className="text-xs">
+                      <CopyText text={a} display={`${a.slice(0, 8)}…${a.slice(-6)}`} className="text-[12px]" />
+                      <ExtLink href={addrUrl(state.network.explorer, a)} className="text-[12px]">
                         {' '}
                       </ExtLink>
                     </span>
                   )
                 ) : (
-                  <span className="text-xs text-fog-500">—</span>
+                  <span className="text-[12px] text-ink-3">—</span>
                 )}
               </li>
             ))}
           </ul>
-          <div className="mt-4 text-[11px] text-fog-500">Chain {state.network.chainId} · all value in native {state.network.token}</div>
+          <div className="mt-4 text-[12px] text-ink-3">
+            {mock ? `Demo replay modelled on peaq agung · values in ${unit}` : `Chain ${state.network.chainId} · all value in native ${unit}`}
+          </div>
         </div>
-        <div className="card grid grid-cols-3 divide-x divide-white/[0.06] overflow-hidden">
-          {[
-            ['GitHub', LINKS.github],
-            ['README', LINKS.readme],
-            ['Demo video', LINKS.video],
-          ].map(([t, href]) => (
-            <a key={t} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer" className="px-3 py-4 text-center text-sm font-medium text-fog-200 transition hover:bg-peaq-500/10 hover:text-fog-100">
-              {t} <span className="text-fog-500">↗</span>
-            </a>
-          ))}
-        </div>
+        {links.length > 0 && (
+          <div className="card grid divide-x divide-rule overflow-hidden" style={{ gridTemplateColumns: `repeat(${links.length}, minmax(0, 1fr))` }}>
+            {links.map(([t, href]) => (
+              <a key={t} href={href} target="_blank" rel="noreferrer" className="px-3 py-4 text-center text-sm font-medium text-ink transition-colors duration-200 hover:bg-paper-2">
+                {t} <span className="text-ink-3">↗</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
