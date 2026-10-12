@@ -140,7 +140,10 @@ function FacilityCard({ state }: { state: SkimState }) {
   const shownN = repaid ? segs.length : lagN;
   const segSum = segs.slice(0, shownN).reduce((a, x) => a + x.vault, 0n);
   // Σ segments == loan.repaid (A1); fall back to loan.repaid once every segment is shown.
-  const shownRepaid = loan ? (shownN >= segs.length ? loan.repaid : segSum) : 0n;
+  // QA-8: on live data loan.repaid is read at 'latest' and can be a block ahead of the scanned
+  // RevenueRouted logs, so while the loan is active the number follows the drawn segments (capped at
+  // loan.repaid) and never leads the bar. Once repaid it is the contract value.
+  const shownRepaid = loan ? (repaid ? loan.repaid : segSum > loan.repaid ? loan.repaid : segSum) : 0n;
   const big = loan ? fmtToken(shownRepaid, 2) : fmtToken(principal, 2);
 
   let statusLine: { text: string; tone: string };

@@ -3,7 +3,7 @@ import type { SkimState } from '@/lib/types';
 import { gradeName } from '@/lib/config';
 import { fmtDate, fmtToken, pct, ratio } from '@/lib/format';
 import { Chip, HashRef, Stat } from './ui';
-import { hasLoan, isRepaid, loanFeeBps, loanGrade, nextLine, unitLabel } from './view';
+import { hasLoan, isRepaid, loanFeeBps, loanGrade, nextLine, payoffSegments, unitLabel } from './view';
 
 const STATUS = ['No loan', 'Active', 'Repaid', 'Defaulted'];
 
@@ -28,6 +28,8 @@ export function LoanPanel({ state }: { state: SkimState }) {
   const skimBps = loan ? loan.skimBps : q?.skimBps;
   const owed = loan ? loan.owed : q ? (q.principal * BigInt(10000 + q.feeBps)) / 10000n : undefined;
   const next = nextLine(state);
+  // sessions of THIS loan (a machine can have closed earlier loans; the feed keeps all of them)
+  const nSess = payoffSegments(state).length;
 
   return (
     <div className="card h-full p-5 sm:p-6">
@@ -92,11 +94,11 @@ export function LoanPanel({ state }: { state: SkimState }) {
       <div className={`mt-5 flex h-10 items-center justify-between gap-3 rounded-lg border px-3 transition-colors duration-300 ${repaid ? 'border-repaid/50 bg-repaid/10' : 'border-rule bg-paper-2'}`}>
         <span className={`min-w-0 truncate text-[13px] ${repaid ? 'font-medium text-repaid-text' : 'text-ink-2'}`}>
           {repaid
-            ? `Repaid ✓ · NFT returned to operator · ${state.sessions.length} revenue session${state.sessions.length === 1 ? '' : 's'}`
+            ? `Repaid ✓ · NFT returned to operator · ${nSess} revenue session${nSess === 1 ? '' : 's'}`
             : loan?.status === 3
               ? 'Defaulted · vault keeps the Machine NFT'
               : loan
-                ? `Repaying from revenue · ${state.sessions.length} session${state.sessions.length === 1 ? '' : 's'} so far`
+                ? `Repaying from revenue · ${nSess} session${nSess === 1 ? '' : 's'} so far`
                 : 'No advance drawn yet'}
         </span>
         <span className="hidden shrink-0 sm:inline-flex">{repaid && <HashRef state={state} hash={state.closed?.txHash} />}</span>

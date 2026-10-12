@@ -150,11 +150,14 @@ export function RevenueFeed({ state }: { state: SkimState }) {
   // "verified" only where the event lands in peaq's real EventRegistry 2.0 (mainnet); agung/local/demo write to a mock.
   const realRegistry = state.network.isMainnet && !demo;
   const sessionsSub = pending > 0 ? `${verified} ${realRegistry ? 'verified' : 'posted'} · ${pending} pending` : realRegistry ? `${verified} verified` : `${verified} events posted`;
+  // KPIs are cumulative over every loan this machine has had; say so once there is more than one.
+  const nLoans = state.activity.filter((a) => a.kind === 'loan').length;
+  const scope = nLoans > 1 ? ` · ${nLoans} loans` : '';
   const kpis: [string, string, string, string][] = [
-    ['Sessions', String(state.sessions.length), sessionsSub, 'text-ink'],
-    ['Revenue routed', fmtToken(total, 3), unit, 'text-ink'],
-    ['Repaid to vault', fmtToken(toVault, 3), excess > 0n ? `${unit} · skim capped at owed` : `${unit} · skim share`, 'text-skim-text'],
-    ['Forwarded to machine', fmtToken(toMachine, 3), unit, 'text-ink'],
+    ['Sessions', String(state.sessions.length), nLoans > 1 ? `${verified} posted${pending > 0 ? ` · ${pending} pending` : ''}${scope}` : sessionsSub, 'text-ink'],
+    ['Revenue routed', fmtToken(total, 3), `${unit}${scope}`, 'text-ink'],
+    ['Repaid to vault', fmtToken(toVault, 3), scope ? `${unit}${scope}` : excess > 0n ? `${unit} · skim capped at owed` : `${unit} · skim share`, 'text-skim-text'],
+    ['Forwarded to machine', fmtToken(toMachine, 3), `${unit}${scope}`, 'text-ink'],
   ];
 
   return (
